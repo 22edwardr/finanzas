@@ -63,6 +63,33 @@ app.use((req,res,next) => {
 
 app.use('/', indexRouter);
 
+
+
+passport.use(new LocalStrategy((username, password, done) => {
+  const db = require("./db");
+  const params = [username];
+
+  db.all('SELECT id, password FROM users WHERE username = ?', params, (err, results, fields) => {
+    if (err) {
+      return done(err);
+    }
+
+    if (results.length === 0) {
+      return done(null, false);
+    } else {
+      const hash = results[0].password.toString();
+      
+      bcrypt.compare(password, hash, (err, response) => {
+        if (response === true) {
+          return done(null, { user_id: results[0].id });
+        } else {
+          return done(null, false);
+        }
+      });
+    }
+  });
+}));
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
