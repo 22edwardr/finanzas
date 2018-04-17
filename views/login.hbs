@@ -4,36 +4,79 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Express</title>
+    <title>Finanzas</title>
     <link rel="stylesheet" href="stylesheets/foundation.min.css">
     <link rel="stylesheet" href="stylesheets/app.css">
 </head>
 <body style="background-image: url(images/loginbkg.png)">
-    <form action="/Ingresar" method="POST">
+    
             <div class="grid-container">
                 <div class="grid-x">
                     <div class="large-4 medium-6  large-offset-4  medium-offset-3 cell" style="background:rgba(255, 255, 255, 0.25);color: white;padding-top: 20pt;padding: 50pt 10pt 20pt 10pt;"> 
-                        <h1>Lorem ipsum2</h1>
-                        <label style="padding-top: 20pt;">
-                            Usuario
-                            <input type="text" name="usuario" placeholder="Ingresa tu usuario" required>
-                        </label>
-                        <label>
-                            Clave
-                            <input type="password" name="clave" placeholder="Ingresa tu clave" required>
-                        </label>
-                        <div class="row">
-                            <div class="medium-12 medium-centered text-center columns" style="padding-top: 10pt;">
-                                <button class="button" type="submit" value="Submit">Ingresar</button>
+                        <h1>{{ titulo }}</h1>
+                        {{#if errores}} 
+                            {{#each errores}}
+                            <div class="callout" data-closable>
+                                <span class="close-button" aria-label="Close alert" type="button" data-close>
+                                    <span aria-hidden="true">&times;</span>
+                                </span >
+                                {{this.msg}}
                             </div>
-                        </div>
+                            {{/each}}
+                        {{/if}} 
+                        {{#if isLogin}}
+                            <form action="/Ingreso" method="POST">
+                                <label style="padding-top: 20pt;">
+                                    Usuario
+                                    <input type="text" name="usuario" placeholder="Ingresa tu usuario">
+                                </label>
+                                <label>
+                                    Clave
+                                    <input type="password" name="clave" placeholder="Ingresa tu clave">
+                                </label>
+                                <div class="row">
+                                    <div class="medium-12 medium-centered text-center columns" style="padding-top: 10pt;">
+                                        <button class="button" type="submit" value="Submit">Ingresar</button>
+                                        <button class="button" name="LoginToggle" type="submit" value="Registro" formaction="/LoginToggle">Registro</button>
+                                    </div>
+                                </div>
+                            </form>
+                        {{else}}
+                            <form action="/Registro" method="POST">
+                                <label style="padding-top: 20pt;">
+                                    Usuario
+                                    <input type="text" name="usuario" placeholder="Ingresa tu usuario">
+                                </label>
+                                <label>
+                                    Nombre
+                                    <input type="text" name="nombre" placeholder="Ingresa tu nombre">
+                                </label>
+                                <label>
+                                    Correo
+                                    <input type="text" name="correo" placeholder="Ingresa tu correo">
+                                </label>
+                                <label>
+                                    Clave
+                                    <input type="password" name="clave" placeholder="Ingresa tu clave">
+                                </label>
+                                <label>
+                                    Clave
+                                    <input type="password" name="clave2" placeholder="Confirma tu clave">
+                                </label>
+                                <div class="row">
+                                    <div class="medium-12 medium-centered text-center columns" style="padding-top: 10pt;">
+                                        <button class="button" type="submit" value="Submit">Registrate</button>
+                                        <button class="button" name="LoginToggle" type="submit" value="Login" formaction="/LoginToggle">Logueate</button>
+                                    </div>
+                                </div>
+                            </form>                                              
+                        {{/if}}
                     </div>
                 </div>
-            </div>
-        <script src="javascripts/vendor/jquery.js"></script>
-        <script src="javascripts/vendor/what-input.js"></script>
-        <script src="javascripts/vendor/foundation.min.js"></script>
-        <script src="javascripts/app.js"></script>
-    </form>
+            </div>       
+    <script src="javascripts/vendor/jquery.js"></script>
+    <script src="javascripts/vendor/what-input.js"></script>
+    <script src="javascripts/vendor/foundation.min.js"></script>
+    <script src="javascripts/app.js"></script>
   </body>
 </html>

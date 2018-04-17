@@ -65,11 +65,11 @@ app.use('/', indexRouter);
 
 
 
-passport.use(new LocalStrategy((username, password, done) => {
+passport.use(new LocalStrategy((usuario, clave, done) => {
   const db = require("./db");
-  const params = [username];
+  const params = [usuario];
 
-  db.all('SELECT id, password FROM users WHERE username = ?', params, (err, results, fields) => {
+  db.all('SELECT u_consecutivo,u_clave FROM Usuario WHERE u_usuario = ?', params, (err, results, fields) => {
     if (err) {
       return done(err);
     }
@@ -77,11 +77,11 @@ passport.use(new LocalStrategy((username, password, done) => {
     if (results.length === 0) {
       return done(null, false);
     } else {
-      const hash = results[0].password.toString();
+      const hash = results[0].u_clave.toString();
       
-      bcrypt.compare(password, hash, (err, response) => {
+      bcrypt.compare(clave, hash, (err, response) => {
         if (response === true) {
-          return done(null, { user_id: results[0].id });
+          return done(null, { user_id: results[0].u_consecutivo });
         } else {
           return done(null, false);
         }

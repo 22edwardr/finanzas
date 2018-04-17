@@ -33,10 +33,10 @@ npm-debug.log
 *.map
 
 # Local env file with credentials
-*.env
+.env
 
 # Database
-database
+#database
 
 # Editor
 .vscode
