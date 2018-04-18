@@ -4,8 +4,8 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cookieParser = require('cookie-parser');
 const expressValidator = require("express-validator");
 
 //1.1 Authentification Libraries
@@ -43,7 +43,9 @@ sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  expiration: 3600000,
+  checkExpirationInterval: 900000
 });
 
 app.use(session({
@@ -65,11 +67,16 @@ app.use('/', indexRouter);
 
 
 
-passport.use(new LocalStrategy((usuario, clave, done) => {
+passport.use(new LocalStrategy({
+    usernameField: 'usuario',
+    passwordField: 'clave'
+  },
+  (usuario, clave, done) => {
   const db = require("./db");
   const params = [usuario];
 
-  db.all('SELECT u_consecutivo,u_clave FROM Usuario WHERE u_usuario = ?', params, (err, results, fields) => {
+  db.query('SELECT u_consecutivo,u_clave FROM Usuario WHERE u_usuario = ?', params, (err, results) => {
+
     if (err) {
       return done(err);
     }
@@ -78,13 +85,11 @@ passport.use(new LocalStrategy((usuario, clave, done) => {
       return done(null, false);
     } else {
       const hash = results[0].u_clave.toString();
-      
       bcrypt.compare(clave, hash, (err, response) => {
-        if (response === true) {
+        if (response === true)
           return done(null, { user_id: results[0].u_consecutivo });
-        } else {
+        else
           return done(null, false);
-        }
       });
     }
   });

@@ -21,11 +21,16 @@ router.post("/LoginToggle", (req, res) => {
         res.redirect('/Login');
 });
 
-router.get("/", (req,res) => {
+router.get("/", authenticationMiddleware(), (req,res) => {
     console.log(req.user);
     console.log(req.isAuthenticated());
-    res.render("sampleFoundation");
-})
+    res.render("index");   
+});
+
+router.post("/Ingreso", passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/Login'
+  }));
 
 router.post("/Registro",(req,res)=> {
     const { usuario , nombre , correo , clave , clave2 } = req.body;
@@ -67,6 +72,13 @@ router.post("/Registro",(req,res)=> {
     }
     
 });
+
+/* GET /logout */
+router.get("/logout", (req, res) => {
+    req.logout();
+    req.session.destroy();
+    res.redirect("/");
+  })
 
 passport.serializeUser((user, done) => {
     done(null, user);
