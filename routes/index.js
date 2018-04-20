@@ -64,7 +64,6 @@ router.post("/Registro",(req,res)=> {
                     req.login(results.insertId, err => {
                         res.redirect("/");
                         console.log("Registro exitoso");
-                        db.end();
                     });
                 }
             )

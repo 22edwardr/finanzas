@@ -1,5 +1,3 @@
-DROP DATABASE finanzas;
-
 CREATE DATABASE finanzas;
 
 USE finanzas;
