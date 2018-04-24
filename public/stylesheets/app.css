@@ -1,5 +1,4 @@
 body {
-    padding: 50px;
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   }
   
@@ -10,3 +9,7 @@ body {
   label{
     color: #fff;
   }
+
+.position-right{
+    width: 60%;
+}

@@ -8,6 +8,11 @@ const db = require("../db");
 const saltRounds = 10; 
 
 
+
+
+
+
+
 // Logueo
 
 router.get("/Login", (req, res) => {
@@ -53,8 +58,6 @@ router.post("/Registro",(req,res)=> {
         console.log(`errors: ${JSON.stringify(errores)}`);
         res.render("login", { titulo: "Registro", isLogin: false, errores });
     } else {
-        const db = require("../db");
-
         bcrypt.hash(clave , saltRounds ,(err,hash) => {
             const params = [usuario , nombre , correo , hash];
 
@@ -72,12 +75,43 @@ router.post("/Registro",(req,res)=> {
     
 });
 
-/* GET /logout */
 router.get("/logout", (req, res) => {
     req.logout();
     req.session.destroy();
     res.redirect("/");
-  })
+  });
+
+
+
+
+//Tipo Gastos
+
+router.get("/tipoGasto", (req, res) => {
+    db.query('SELECT tg_codigo,tg_nombre,tg_descripcion,tg_promedio,tg_deseado,tg_color FROM Tipo_Gasto ORDER BY tg_codigo', null, (err, results) => {
+    if (err) throw err;
+
+    if (results.length === 0) {
+        res.render("tipoGasto", { active: "tipoGasto", errores: { msg:"No se encontraron registros"}});
+    } else {
+        res.render("tipoGasto", { active: "tipoGasto", results});
+    }
+    });
+   
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Generalidades
 
 passport.serializeUser((user, done) => {
     done(null, user);

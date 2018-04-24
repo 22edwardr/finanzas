@@ -1,0 +1,50 @@
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas</title>
+    <link rel="stylesheet" href="stylesheets/foundation.min.css">
+    <link rel="stylesheet" href="stylesheets/app.css">
+</head>
+<body>
+  <div class="off-canvas-wrapper">
+  <div class="off-canvas position-left" id="offCanvas" data-off-canvas>
+    <!--Menu items-->
+
+    <ul class="vertical menu accordion-menu" data-accordion-menu>
+    <li>
+      <a href="#">Parametros</a>
+      <ul class="menu vertical nested">
+        <li class="is-active" id="tipoGasto"><a href="/tipoGasto">Tipos gastos</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#">Informes</a>
+      <ul class="menu vertical nested">
+      </ul>
+    </li>
+    </ul>
+  </div>
+  <div class="off-canvas-content" data-off-canvas-content>
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <ul class="dropdown menu" data-dropdown-menu>
+          <!--Top bar items -->
+          <li><a href="#" class="menu-icon" data-toggle="offCanvas"></a></li>
+        </ul>
+      </div>
+      <div class="top-bar-right">
+      </div>
+    </div>
+    {{#if errores}} 
+      {{#each errores}}
+        <div class="callout" data-closable>
+            <span class="close-button" aria-label="Close alert" type="button" data-close>
+                <span aria-hidden="true">&times;</span>
+            </span >
+            {{this.msg}}
+        </div>
+      {{/each}}
+    {{/if}} 
