@@ -69,7 +69,7 @@ router.post("/Registro",(req,res)=> {
                         console.log("Registro exitoso");
                     });
                 }
-            )
+            );
         });
     }
     
@@ -86,19 +86,88 @@ router.get("/logout", (req, res) => {
 
 //Tipo Gastos
 
-router.get("/tipoGasto", (req, res) => {
-    db.query('SELECT tg_codigo,tg_nombre,tg_descripcion,tg_promedio,tg_deseado,tg_color FROM Tipo_Gasto ORDER BY tg_codigo', null, (err, results) => {
-    if (err) throw err;
-
-    if (results.length === 0) {
-        res.render("tipoGasto", { active: "tipoGasto", errores: { msg:"No se encontraron registros"}});
-    } else {
-        res.render("tipoGasto", { active: "tipoGasto", results});
-    }
-    });
-   
+router.get("/tipoGasto", authenticationMiddleware(), (req, res) => {
+    buscarTipoGastos(res);
 });
 
+router.post("/tipoGasto",authenticationMiddleware(), (req,res) => {
+    const { codigo , id,  nombre ,  descripcion , color, deseado, balance, submit } = req.body;
+
+
+    if(submit != 'del'){
+        req.checkBody(submit == "mod" ? "id" : "codigo","El codigo no puede ser nulo").notEmpty();
+        req.checkBody("nombre","El nombre no puede ser nulo").notEmpty();
+        req.checkBody("color","Este no es un color valido").matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+        req.checkBody("deseado","El porcentaje deseado debe ser numerico entre 0 y 100").isNumeric();
+        let errores = req.validationErrors();
+
+        if(!errores && (deseado < 0 || deseado > 100 ))
+            errores = [{msg: "El porcentaje deseado debe ser numerico entre 0 y 100"}];
+
+        if(errores)
+            buscarTipoGastos(res,errores);
+        else{
+            if(submit == "mod"){
+                let params = [nombre,descripcion,deseado,color,id];
+                db.query("UPDATE Tipo_Gasto SET tg_nombre = ? , tg_descripcion = ? , tg_deseado = ?, tg_color = ? WHERE tg_codigo = ?;", params ,
+                    (err,results) => {
+                        if (err) throw err;
+                        buscarTipoGastos(res,[{msg: "Actualizacion exitosa"}]);
+                    }
+                );
+            }else{
+                let params = [codigo,nombre,descripcion,deseado,color];
+                db.query("INSERT INTO Tipo_Gasto(tg_codigo,tg_nombre,tg_descripcion,tg_deseado,tg_color) VALUES (?,?,?,?,?);", params ,
+                    (err,results) => {
+                        if (err) throw err;
+                        buscarTipoGastos(res,[{msg: "Inserción exitosa"}]);
+                    }
+                );
+            }
+        }
+    }else{
+        req.checkBody("id","El codigo no puede ser nulo").notEmpty();
+        let errores = req.validationErrors();
+        if(errores)
+            buscarTipoGastos(res,errores);
+        else{
+            let params = [id];
+            db.query("DELETE FROM Tipo_Gasto WHERE tg_codigo = ?;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarTipoGastos(res,[{msg: "Eliminación exitosa"}]);
+                }
+            );
+        }
+    }
+    
+});
+
+
+function buscarTipoGastos(res,errores){
+    db.query('SELECT tg_codigo,tg_nombre,tg_descripcion,(tg_deseado- tg_promedio) tg_balance ,tg_deseado,tg_color FROM Tipo_Gasto ORDER BY tg_codigo', null, (err, results) => {
+        if (err){
+            throw err;
+        } 
+    
+        if (results.length === 0) {
+            let errorNuevo = {msg: "No se encontraron registros"};
+            if(errores)
+                errores.push(errorNuevo);
+            else
+                errores = [errorNuevo];
+            res.render("tipoGasto", { active: "tipoGasto", errores});
+        } else {
+            for(let i=0 ; i<results.length ; i++){
+                if(results[i].tg_balance < 0)
+                    results[i].tg_color_balance = "red";
+                else
+                    results[i].tg_color_balance = "green";
+            }
+            res.render("tipoGasto", { active: "tipoGasto", results, errores});
+        }
+    });
+}
 
 
 

@@ -17,7 +17,7 @@ CREATE TABLE Tipo_Gasto(
 	tg_descripcion VARCHAR(200),
 	tg_promedio DECIMAL(5,2),
 	tg_deseado DECIMAL(5,2),
-	tg_color VARCHAR(6),
+	tg_color VARCHAR(7),
 	PRIMARY KEY(tg_codigo)
 );
 

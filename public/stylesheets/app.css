@@ -1,9 +1,12 @@
+
 body {
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    background-color: #e6e6e6;
   }
+
   
   a {
-    color: #00B7FF;
+    color: #2ba6cb;
   }
   
   label{
@@ -11,5 +14,19 @@ body {
   }
 
 .position-right{
-    width: 60%;
+    width: 100%;
+    overflow-x: hidden;
+    
+}
+
+.page-height{
+  min-height: 675px;
+}
+
+h2{
+  color: #2ba6cb;
+}
+
+.callout{
+  margin: 0;
 }
