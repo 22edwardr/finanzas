@@ -42,10 +42,10 @@
         </div>
       </div>
       <div class="off-canvas-content" data-off-canvas-content>
-        <div class="cell small-10 small-offset-1 page-height">
-            <h2>Tipos de gasto</h2>
+        <div class="cell small-12 page-height">
+            <h2 class="margin10">Tipos de gasto</h2>
 {{#if results}}
-            <table>
+            <table class="margin10 table80" >
                 <tr>
                     <th>Codigo</th>
                     <th>Nombre</th>
@@ -63,8 +63,7 @@
     {{/each}}
             </table>
 {{/if}}
-            <br>
-            <button type="button" class="button" data-toggle="detalle" onclick="irADetalle(null);">Ingresar</button>
+            <button type="button" class="button margin10" data-toggle="detalle" onclick="irADetalle(null);">Ingresar</button>
         </div>
       </div>
     </div> 

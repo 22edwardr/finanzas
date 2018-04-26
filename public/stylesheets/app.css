@@ -4,7 +4,6 @@ body {
     background-color: #e6e6e6;
   }
 
-  
   a {
     color: #2ba6cb;
   }
@@ -29,4 +28,11 @@ h2{
 
 .callout{
   margin: 0;
+}
+
+.margin10{
+  margin-left: 10%;
+}
+.table80{
+  width: 80%;
 }
