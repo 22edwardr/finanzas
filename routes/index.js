@@ -29,7 +29,7 @@ router.post("/LoginToggle", (req, res) => {
 router.get("/", authenticationMiddleware(), (req,res) => {
     console.log(req.user);
     console.log(req.isAuthenticated());
-    res.render("index");   
+    res.render("index",{ active: "index"});   
 });
 
 router.post("/Ingreso", passport.authenticate('local', {
@@ -84,14 +84,14 @@ router.get("/logout", (req, res) => {
 
 
 
-//Tipo Gastos
+//Tipo Debito Credito
 
-router.get("/tipoGasto", authenticationMiddleware(), (req, res) => {
-    buscarTipoGastos(res);
+router.get("/tipoDebitoCredito", authenticationMiddleware(), (req, res) => {
+    buscarTiposDebitoCredito(res);
 });
 
-router.post("/tipoGasto",authenticationMiddleware(), (req,res) => {
-    const { codigo , id,  nombre ,  descripcion , color, deseado, balance, submit } = req.body;
+router.post("/tipoDebitoCredito",authenticationMiddleware(), (req,res) => {
+    const { codigo , id,  nombre ,  descripcion , naturaleza ,  color, deseado, balance, submit } = req.body;
 
 
     if(submit != 'del'){
@@ -99,28 +99,31 @@ router.post("/tipoGasto",authenticationMiddleware(), (req,res) => {
         req.checkBody("nombre","El nombre no puede ser nulo").notEmpty();
         req.checkBody("color","Este no es un color valido").matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
         req.checkBody("deseado","El porcentaje deseado debe ser numerico entre 0 y 100").isNumeric();
+        if(submit != 'mod')
+            req.checkBody("naturaleza","La naturaleza no puede ser nula").notEmpty();
+        
         let errores = req.validationErrors();
 
         if(!errores && (deseado < 0 || deseado > 100 ))
             errores = [{msg: "El porcentaje deseado debe ser numerico entre 0 y 100"}];
 
         if(errores)
-            buscarTipoGastos(res,errores);
+        buscarTiposDebitoCredito(res,errores);
         else{
             if(submit == "mod"){
                 let params = [nombre,descripcion,deseado,color,id];
-                db.query("UPDATE Tipo_Gasto SET tg_nombre = ? , tg_descripcion = ? , tg_deseado = ?, tg_color = ? WHERE tg_codigo = ?;", params ,
+                db.query("UPDATE Tipo_debito_credito SET tdc_nombre = ? , tdc_descripcion = ? , tdc_deseado = ?, tdc_color = ? WHERE tdc_codigo = ?;", params ,
                     (err,results) => {
                         if (err) throw err;
-                        buscarTipoGastos(res,[{msg: "Actualizacion exitosa"}]);
+                        buscarTiposDebitoCredito(res,[{msg: "Actualizacion exitosa"}]);
                     }
                 );
             }else{
-                let params = [codigo,nombre,descripcion,deseado,color];
-                db.query("INSERT INTO Tipo_Gasto(tg_codigo,tg_nombre,tg_descripcion,tg_deseado,tg_color) VALUES (?,?,?,?,?);", params ,
+                let params = [codigo,nombre,descripcion,naturaleza,deseado,color];
+                db.query("INSERT INTO Tipo_debito_credito(tdc_codigo,tdc_nombre,tdc_descripcion,tdc_naturaleza, tdc_deseado,tdc_color,tdc_fecha) VALUES (?,?,?,?,?,?,now());", params ,
                     (err,results) => {
                         if (err) throw err;
-                        buscarTipoGastos(res,[{msg: "Inserción exitosa"}]);
+                        buscarTiposDebitoCredito(res,[{msg: "Inserción exitosa"}]);
                     }
                 );
             }
@@ -129,13 +132,13 @@ router.post("/tipoGasto",authenticationMiddleware(), (req,res) => {
         req.checkBody("id","El codigo no puede ser nulo").notEmpty();
         let errores = req.validationErrors();
         if(errores)
-            buscarTipoGastos(res,errores);
+        buscarTiposDebitoCredito(res,errores);
         else{
             let params = [id];
-            db.query("DELETE FROM Tipo_Gasto WHERE tg_codigo = ?;", params ,
+            db.query("DELETE FROM Tipo_debito_credito WHERE tdc_codigo = ?;", params ,
                 (err,results) => {
                     if (err) throw err;
-                    buscarTipoGastos(res,[{msg: "Eliminación exitosa"}]);
+                    buscarTiposDebitoCredito(res,[{msg: "Eliminación exitosa"}]);
                 }
             );
         }
@@ -144,28 +147,34 @@ router.post("/tipoGasto",authenticationMiddleware(), (req,res) => {
 });
 
 
-function buscarTipoGastos(res,errores){
-    db.query('SELECT tg_codigo,tg_nombre,tg_descripcion,(tg_deseado- tg_promedio) tg_balance ,tg_deseado,tg_color FROM Tipo_Gasto ORDER BY tg_codigo', null, (err, results) => {
+function buscarTiposDebitoCredito(res,errores){
+    db.query('SELECT tdc_codigo,tdc_nombre,tdc_descripcion,(tdc_deseado- tdc_promedio) tdc_balance, tdc_naturaleza,pm_descripcion tdc_naturalezaTexto,tdc_deseado,tdc_color ' +
+     ' FROM Tipo_debito_credito LEFT JOIN Par_multivalor ' +
+     ' ON pm_tabla=\'DEB_CRE\' AND pm_codigo = tdc_naturaleza ORDER BY tdc_codigo', null, (err, results) => {
         if (err){
             throw err;
         } 
-    
-        if (results.length === 0) {
-            let errorNuevo = {msg: "No se encontraron registros"};
-            if(errores)
-                errores.push(errorNuevo);
-            else
-                errores = [errorNuevo];
-            res.render("tipoGasto", { active: "tipoGasto", errores});
-        } else {
-            for(let i=0 ; i<results.length ; i++){
-                if(results[i].tg_balance < 0)
-                    results[i].tg_color_balance = "red";
+        
+        obtenerParMultivalores("DEB_CRE",(err,naturalezas) => {
+            if(err) throw err;
+
+            if (results.length === 0) {
+                let errorNuevo = {msg: "No se encontraron registros"};
+                if(errores)
+                    errores.push(errorNuevo);
                 else
-                    results[i].tg_color_balance = "green";
+                    errores = [errorNuevo];
+                res.render("tipoDebitoCredito", { active: "tipoDebitoCredito", naturalezas, errores});
+            } else {
+                for(let i=0 ; i<results.length ; i++){
+                    if(results[i].tdc_balance < 0)
+                        results[i].tdc_color_balance = "red";
+                    else
+                        results[i].tdc_color_balance = "green";
+                }
+                res.render("tipoDebitoCredito", { active: "tipoDebitoCredito", results, naturalezas, errores});
             }
-            res.render("tipoGasto", { active: "tipoGasto", results, errores});
-        }
+        });
     });
 }
 
@@ -174,6 +183,96 @@ function buscarTipoGastos(res,errores){
 
 
 
+//ParMultivalores
+
+router.get("/parMultivalor", authenticationMiddleware(), (req, res) => {
+    buscarParMultivalores(res);
+});
+
+router.post("/parMultivalor",authenticationMiddleware(), (req,res) => {
+
+    const { tabla , idTabla,  codigo ,  idCodigo , descripcion ,  numerico, texto, fecha, submit } = req.body;
+
+
+    if(submit != 'del'){
+        req.checkBody(submit == "mod" ? "idTabla" : "tabla","La tabla no puede ser nula").notEmpty();
+        req.checkBody(submit == "mod" ? "idCodigo" : "codigo","El codigo debe ser numerico").isNumeric();
+        req.checkBody("descripcion","La descripcion no puede ser nula").notEmpty();
+        if(numerico)
+            req.checkBody("numerico","El valor ingresado debe ser numérico").isNumeric();
+
+        console.log(numerico);
+
+        
+        let errores = req.validationErrors();
+
+        if(errores)
+            buscarParMultivalores(res,errores);
+        else{
+            if(submit == "mod"){
+                let params = [descripcion,numerico,texto,fecha,idTabla,idCodigo];
+                db.query("UPDATE Par_Multivalor SET pm_descripcion = ? , pm_numerico = ? , pm_texto = ?, pm_fecha = ? WHERE pm_tabla = ? AND pm_codigo = ?;", params ,
+                    (err,results) => {
+                        if (err) throw err;
+                        buscarParMultivalores(res,[{msg: "Actualizacion exitosa"}]);
+                    }
+                );
+            }else{
+                let params = [tabla,codigo,descripcion,numerico,texto,fecha];
+                db.query("INSERT INTO Par_Multivalor(pm_tabla,pm_codigo,pm_descripcion,pm_numerico, pm_texto,pm_fecha) VALUES (?,?,?,?,?,?);", params ,
+                    (err,results) => {
+                        if (err) throw err;
+                        buscarParMultivalores(res,[{msg: "Inserción exitosa"}]);
+                    }
+                );
+            }
+        }
+    }else{
+        req.checkBody("idTabla" ,"La tabla no puede ser nula").notEmpty();
+        req.checkBody("idCodigo","El codigo no puede ser nulo").notEmpty();
+        let errores = req.validationErrors();
+        if(errores)
+            buscarParMultivalores(res,errores);
+        else{
+            let params = [idTabla,idCodigo];
+            db.query("DELETE FROM Par_Multivalor WHERE pm_tabla = ? AND pm_codigo = ? ;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarParMultivalores(res,[{msg: "Eliminación exitosa"}]);
+                }
+            );
+        }
+    }
+    
+});
+
+
+function buscarParMultivalores(res,errores){
+    db.query('SELECT * FROM par_multivalor ORDER BY pm_tabla,pm_codigo', null, (err, results) => {
+        if (err){
+            throw err;
+        } 
+        
+
+        if (results.length === 0) {
+            let errorNuevo = {msg: "No se encontraron registros"};
+            if(errores)
+                errores.push(errorNuevo);
+            else
+                errores = [errorNuevo];
+            res.render("parMultivalor", { active: "parMultivalor",  errores});
+        } else {
+            res.render("parMultivalor", { active: "parMultivalor", results,  errores});
+        }
+    });
+}
+
+function obtenerParMultivalores(tabla, cb){
+    let parameters = [tabla];
+    db.query('SELECT * FROM Par_multivalor WHERE pm_tabla = ?', parameters, (err, results) => {
+        cb(err,results);
+    });
+}
 
 
 

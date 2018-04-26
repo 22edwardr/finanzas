@@ -8,8 +8,8 @@
         </span >
         <div class="grid-x grid-margin-x">
             <div class="cell small-10 small-offset-1">
-               <h2>Tipos de gasto</h2>
-                <form action="/tipoGasto" method="POST">
+               <h2 class="align-center">Tipos débito crédito</h2>
+                <form action="/tipoDebitoCredito" method="POST">
                     <label>
                         Codigo
                         <input id="codigo" type="text" name="codigo" maxlength="2" placeholder="Ingresa el codigo">
@@ -24,6 +24,14 @@
                         <input id="descripcion" type="text" name="descripcion" placeholder="Ingresa una descripcion">
                     </label>
                     <label>
+                        Naturaleza
+                        <select id="naturaleza" name="naturaleza">
+                            {{#each naturalezas}}
+                                <option value="{{this.pm_codigo}}">{{this.pm_descripcion}}</option>
+                            {{/each}}
+                        </select>
+                    </label>
+                    <label>
                         Color
                         <input id="color" type="color" name="color">
                     </label>
@@ -35,35 +43,41 @@
                         Balance
                         <input id="balance" type="text" name="promedio" maxlength="5" disabled>
                     </label>
-                    <button id="btn_mod" class="button" name="submit" type="submit" value="mod">Modificar</button>
-                    <button id="btn_del" class="button" name="submit" type="submit" value="del">Eliminar</button>
+                    <div class="align-center">
+                        <button id="btn_mod" class="button" name="submit" type="submit" value="mod">Modificar</button>
+                        <button id="btn_del" class="button" name="submit" type="submit" value="del">Eliminar</button>
+                    </div>
                 </form>
             </div>
         </div>
       </div>
       <div class="off-canvas-content" data-off-canvas-content>
         <div class="cell small-12 page-height">
-            <h2 class="margin10">Tipos de gasto</h2>
+            <h2 class="align-center">Tipos débito crédito</h2>
 {{#if results}}
-            <table class="margin10 table80" >
+            <input id="Busqueda" class="margin-left-40 width-20" type="text" placeholder="Busqueda">
+            <table class="margin-left-10 width-80" >
                 <tr>
                     <th>Codigo</th>
                     <th>Nombre</th>
+                    <th>Naturaleza</th>
                     <th>Balance</th>
                 </tr>
     {{#each results}}
-                <tr data-toggle="detalle" onclick="irADetalle('{{this.tg_codigo}}');">
-                    <td id="codigo{{this.tg_codigo}}">{{this.tg_codigo}}</td>
-                    <td id="nombre{{this.tg_codigo}}">{{this.tg_nombre}}</td>
-                    <td id="balance{{this.tg_codigo}}" style="color:{{this.tg_color_balance}}">{{this.tg_balance}}</td>
-                    <td id="color{{this.tg_codigo}}" style="display:none;">{{this.tg_color}}</td>
-                    <td id="deseado{{this.tg_codigo}}" style="display:none;">{{this.tg_deseado}}</td>
-                    <td id="descripcion{{this.tg_codigo}}" style="display:none;">{{this.tg_descripcion}}</td>
+                <tr id="fila{{this.tdc_codigo}}" data-toggle="detalle" onclick="irADetalle('{{this.tdc_codigo}}');">
+                    <td id="codigo{{this.tdc_codigo}}">{{this.tdc_codigo}}</td>
+                    <td id="nombre{{this.tdc_codigo}}">{{this.tdc_nombre}}</td>
+                    <td id="naturalezaTexto{{this.tdc_codigo}}">{{this.tdc_naturalezaTexto}}</td>
+                    <td id="balance{{this.tdc_codigo}}" style="color:{{this.tdc_color_balance}}">{{this.tdc_balance}}</td>
+                    <td id="naturaleza{{this.tdc_codigo}}" style="display:none;">{{this.tdc_naturaleza}}</td>
+                    <td id="color{{this.tdc_codigo}}" style="display:none;">{{this.tdc_color}}</td>
+                    <td id="deseado{{this.tdc_codigo}}" style="display:none;">{{this.tdc_deseado}}</td>
+                    <td id="descripcion{{this.tdc_codigo}}" style="display:none;">{{this.tdc_descripcion}}</td>
                 </tr>
     {{/each}}
             </table>
 {{/if}}
-            <button type="button" class="button margin10" data-toggle="detalle" onclick="irADetalle(null);">Ingresar</button>
+            <button type="button" class="button margin-left-35 width-30" data-toggle="detalle" onclick="irADetalle(null);">Ingresar</button>
         </div>
       </div>
     </div> 
@@ -89,6 +103,7 @@
             $('#color').val('');
             $('#deseado').val('');
             $('#descripcion').val('');
+            $('#naturaleza').val('');
 
 
         }else{
@@ -99,6 +114,8 @@
              $('#color').val($('#color'+codigo).html());
              $('#deseado').val($('#deseado'+codigo).html());
              $('#descripcion').val($('#descripcion'+codigo).html());
+             $('#naturaleza').val($('#naturaleza'+codigo).html());
+
 
             disabled = true;
             valBtn = "mod";
@@ -109,6 +126,7 @@
             }
             
             $('#codigo').prop("disabled",disabled);
+            $('#naturaleza').prop("disabled",disabled);
             $('#btn_mod').val(valBtn);
             $('#btn_mod').html(htmlBtn);
             $('#btn_del').css({'display' : displayDel});
@@ -117,6 +135,25 @@
         }
 
     $(function(){
+        $("#Busqueda" ).keyup(function() {
+            $( "tr" ).each(function( index ) {
+                if($( this ).attr('id')){
+                    if($( this ).attr('id').match(/fila/) ) {
+                        let fila = $(this).attr('id').replace("fila","");
+                        let valBusqueda =  $("#Busqueda" ).val();
+                        let regexBusqueda = new RegExp(valBusqueda,"g");
+
+                        if($('#codigo'+fila).html().match(regexBusqueda)
+                                || $('#nombre'+fila).html().match(regexBusqueda) ){
+                            $(this).show();
+            
+                        }else{
+                            $(this).hide();
+                        }
+					}
+                }
+            });
+        });
         
     });
 </script>

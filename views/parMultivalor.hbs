@@ -1,0 +1,152 @@
+{{> header }}
+<div class="grid-x grid-margin-x" style="min-height: 100%">
+  <div class="cell small-12 medium-8 medium-offset-2 reveal-for-medium reveal-for-large"> 
+    <div class="off-canvas-wrapper">
+      <div class="off-canvas-absolute position-right" id="detalle" data-off-canvas>
+        <span class="close-button" aria-label="Close menu" type="button" data-close>
+            <span aria-hidden="true">&times;</span>
+        </span >
+        <div class="grid-x grid-margin-x">
+            <div class="cell small-10 small-offset-1">
+               <h2 class="align-center">Par Multivalores</h2>
+                <form action="/parMultivalor" method="POST">
+                    <label>
+                        Tabla
+                        <input id="tabla" type="text" name="tabla" maxlength="10" placeholder="Ingresa la tabla">
+                        <input id="idTabla" type="text" name="idTabla" value="" style="display:none;">
+                    </label>
+                    <label>
+                        Codigo
+                        <input id="codigo" type="text" name="codigo" maxlength="10" placeholder="Ingresa el código">
+                        <input id="idCodigo" type="text" name="idCodigo" value="" style="display:none;">
+                    </label>
+                    <label>
+                        Descripcion
+                        <input id="descripcion" type="text" name="descripcion" placeholder="Ingresa una descripcion">
+                    </label>
+                    <label>
+                        Numero
+                        <input id="numerico" type="text" maxlength="11" name="numerico" placeholder="Ingresa el número">
+                    </label>
+                    <label>
+                        Texto
+                        <input id="texto" type="text"  name="texto" placeholder="Ingresa el texto">
+                    </label>
+                     <label>
+                        Fecha
+                        <input id="fecha" type="date"  name="fecha" placeholder="Ingresa el texto">
+                    </label>
+                    <div class="align-center">
+                        <button id="btn_mod" class="button" name="submit" type="submit" value="mod">Modificar</button>
+                        <button id="btn_del" class="button" name="submit" type="submit" value="del">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      </div>
+      <div class="off-canvas-content" data-off-canvas-content>
+        <div class="cell small-12 page-height">
+            <h2 class="align-center">Par Multivalores</h2>
+{{#if results}}
+            <input id="Busqueda" class="margin-left-40 width-20" type="text" placeholder="Busqueda">
+            <table class="margin-left-10 width-80" >
+                <tr>
+                    <th>Tabla</th>
+                    <th>Codigo</th>
+                    <th>Descripcion</th>
+                </tr>
+    {{#each results}}
+                <tr id="fila{{this.pm_tabla}}_{{this.pm_codigo}}" data-toggle="detalle" onclick="irADetalle('{{this.pm_tabla}}_{{this.pm_codigo}}');">
+                    <td id="tabla{{this.pm_tabla}}_{{this.pm_codigo}}">{{this.pm_tabla}}</td>
+                    <td id="codigo{{this.pm_tabla}}_{{this.pm_codigo}}">{{this.pm_codigo}}</td>
+                    <td id="descripcion{{this.pm_tabla}}_{{this.pm_codigo}}">{{this.pm_descripcion}}</td>
+                    <td id="numerico{{this.pm_tabla}}_{{this.pm_codigo}}" style="display:none;">{{this.pm_numerico}}</td>
+                    <td id="texto{{this.pm_tabla}}_{{this.pm_codigo}}" style="display:none;">{{this.pm_texto}}</td>
+                    <td id="fecha{{this.pm_tabla}}_{{this.pm_codigo}}" style="display:none;">{{this.pm_fecha}}</td>
+                </tr>
+    {{/each}}
+            </table>
+{{/if}}
+            <button type="button" class="button margin-left-35 width-30" data-toggle="detalle" onclick="irADetalle(null);">Ingresar</button>
+        </div>
+      </div>
+    </div> 
+  </div>
+</div>
+
+    
+{{> footer }}
+
+<script>
+    function irADetalle(codigo){
+        var disabled = false;
+        var displayDel = 'none';
+        var displayBal = 'none';
+        var valBtn = "ins";
+        var htmlBtn = "Insertar";
+
+        if(!codigo){
+            $('#tabla').val('');
+            $('#idTabla').val('');
+            $('#codigo').val('');
+            $('#idCodigo').val('');
+            $('#descripcion').val('');
+            $('#numerico').val('');
+            $('#texto').val('');
+            $('#fecha').val('');
+            
+
+
+        }else{
+             $('#tabla').val($('#tabla'+codigo).html());
+             $('#idTabla').val($('#tabla'+codigo).html());
+             $('#codigo').val($('#codigo'+codigo).html());
+             $('#idCodigo').val($('#codigo'+codigo).html());
+             $('#descripcion').val($('#descripcion'+codigo).html());
+             $('#numerico').val($('#numerico'+codigo).html());
+             $('#texto').val($('#texto'+codigo).html());
+             $('#fecha').val($('#fecha'+codigo).html());
+
+
+            disabled = true;
+            valBtn = "mod";
+            htmlBtn = "Modificar";
+            displayDel = "inline-block";
+            displayBal = "block";
+            
+            }
+            
+            $('#tabla').prop("disabled",disabled);
+            $('#codigo').prop("disabled",disabled);
+            $('#btn_mod').val(valBtn);
+            $('#btn_mod').html(htmlBtn);
+            $('#btn_del').css({'display' : displayDel});
+            
+        }
+
+    $(function(){
+        $("#Busqueda" ).keyup(function() {
+            $( "tr" ).each(function( index ) {
+                if($( this ).attr('id')){
+                    if($( this ).attr('id').match(/fila/) ) {
+                        let fila = $(this).attr('id').replace("fila","");
+                        let valBusqueda =  $("#Busqueda" ).val();
+                        let regexBusqueda = new RegExp(valBusqueda,"g");
+
+                        if($('#tabla'+fila).html().match(regexBusqueda)
+                                || $('#descripcion'+fila).html().match(regexBusqueda) ){
+                            $(this).show();
+            
+                        }else{
+                            $(this).hide();
+                        }
+					}
+                }
+            });
+        });
+        
+    });
+</script>
+</body>
+</html>
+

@@ -3,3 +3,10 @@
     <script src="javascripts/vendor/jquery.js"></script>
     <script src="javascripts/vendor/foundation.min.js"></script>
     <script src="javascripts/app.js"></script>
+    <script>
+        $('.opcion').each(function(index){
+            $(this).removeClass("is-active");
+        });
+        {{active}}.classList.add("is-active");
+        
+    </script>
