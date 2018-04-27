@@ -16,18 +16,17 @@ const saltRounds = 10;
 // Logueo
 
 router.get("/Login", (req, res) => {
-    res.render("login", { titulo: "Ingreso", isLogin: true });
+    res.render("login", { titulo: res.__('Ingreso'), isLogin: true });
 });
 
 router.post("/LoginToggle", (req, res) => {
     if(req.body.LoginToggle == "Registro")
-        res.render("login", { titulo: "Registro", isLogin: false });
+        res.render("login", { titulo: res.__('Registro'), isLogin: false });
     else
         res.redirect('/Login');
 });
 
 router.get("/", authenticationMiddleware(), (req,res) => {
-    console.log(req.user);
     console.log(req.isAuthenticated());
     res.render("index",{ active: "index"});   
 });
@@ -40,23 +39,21 @@ router.post("/Ingreso", passport.authenticate('local', {
 router.post("/Registro",(req,res)=> {
     const { usuario , nombre , correo , clave , clave2 } = req.body;
 
-    req.checkBody("usuario","El usuario no puede ser vacio").notEmpty();
+    req.checkBody("usuario",res.__('El usuario no puede ser vacio')).notEmpty();
 
-    req.checkBody("nombre","El nombre no puede ser vacio").notEmpty();
+    req.checkBody("nombre",res.__('El nombre no puede ser vacio')).notEmpty();
 
-    req.checkBody("correo","El correo no puede ser vacio").notEmpty();
-    req.checkBody("correo","El correo ingresado es invalido").isEmail();
+    req.checkBody("correo",res.__('El correo ingresado es inválido')).isEmail();
 
-    req.checkBody("clave","La clave debe tener minimo 8 caracteres").len(8,100);
-    req.checkBody("clave","La clave debe incluir una letra minúscula, una mayúscula, un numero y un caracter especial").matches(/^(?=.*\d)(?=.*[a-z])(?!.* )(?=.*[^a-zA-Z0-9]).{8,}$/, "i");
+    req.checkBody("clave",res.__('La clave debe tener mínimo 8 caracteres')).len(8,100);
+    req.checkBody("clave",res.__('La clave debe incluir una letra minúscula, una mayúscula, un número y un caracter especial')).matches(/^(?=.*\d)(?=.*[a-z])(?!.* )(?=.*[^a-zA-Z0-9]).{8,}$/, "i");
 
-    req.checkBody("clave2","Las claves ingresadas no coinciden").equals(clave);
+    req.checkBody("clave2",res.__('Las claves ingresadas no coinciden')).equals(clave);
 
     const errores = req.validationErrors();
 
     if (errores) {
-        console.log(`errors: ${JSON.stringify(errores)}`);
-        res.render("login", { titulo: "Registro", isLogin: false, errores });
+        res.render("login", { titulo: res.__('Registro'), isLogin: false, errores });
     } else {
         bcrypt.hash(clave , saltRounds ,(err,hash) => {
             const params = [usuario , nombre , correo , hash];
@@ -66,7 +63,7 @@ router.post("/Registro",(req,res)=> {
                     if (err) throw err;
                     req.login(results.insertId, err => {
                         res.redirect("/");
-                        console.log("Registro exitoso");
+                        console.log(res.__('Registro exitoso'));
                     });
                 }
             );
@@ -74,6 +71,7 @@ router.post("/Registro",(req,res)=> {
     }
     
 });
+
 
 router.get("/logout", (req, res) => {
     req.logout();
@@ -83,74 +81,68 @@ router.get("/logout", (req, res) => {
 
 
 
-
 //Tipo Debito Credito
 
 router.get("/tipoDebitoCredito", authenticationMiddleware(), (req, res) => {
-    buscarTiposDebitoCredito(res);
+    let usuario = req.session.passport.user;
+    buscarTiposDebitoCredito(usuario,res);
 });
 
 router.post("/tipoDebitoCredito",authenticationMiddleware(), (req,res) => {
-    const { codigo , id,  nombre ,  descripcion , naturaleza ,  color, deseado, balance, submit } = req.body;
+    const { codigo , consecutivo ,  nombre ,  descripcion , naturaleza ,  color, deseado, balance, submit } = req.body;
+    let usuario = req.session.passport.user;
 
+    if( submit != "del"){
+        req.checkBody("codigo",res.__('El código no puede ser nulo')).notEmpty();
+        req.checkBody("nombre",res.__('El nombre no puede ser nulo')).notEmpty();
+        req.checkBody("color",res.__('El color es inválido')).matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+        req.checkBody("deseado",res.__('El valor deseado debe ser numérico')).isNumeric();
+    }
 
-    if(submit != 'del'){
-        req.checkBody(submit == "mod" ? "id" : "codigo","El codigo no puede ser nulo").notEmpty();
-        req.checkBody("nombre","El nombre no puede ser nulo").notEmpty();
-        req.checkBody("color","Este no es un color valido").matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
-        req.checkBody("deseado","El porcentaje deseado debe ser numerico entre 0 y 100").isNumeric();
-        if(submit != 'mod')
-            req.checkBody("naturaleza","La naturaleza no puede ser nula").notEmpty();
-        
-        let errores = req.validationErrors();
+    if(submit == 'ins')
+        req.checkBody("naturaleza",res.__('La naturaleza no puede ser nula')).notEmpty();
+    else
+        req.checkBody("consecutivo",res.__('El identificador no puede ser nulo')).isNumeric();
+    
+    let errores = req.validationErrors();
 
-        if(!errores && (deseado < 0 || deseado > 100 ))
-            errores = [{msg: "El porcentaje deseado debe ser numerico entre 0 y 100"}];
-
-        if(errores)
-        buscarTiposDebitoCredito(res,errores);
-        else{
-            if(submit == "mod"){
-                let params = [nombre,descripcion,deseado,color,id];
-                db.query("UPDATE Tipo_debito_credito SET tdc_nombre = ? , tdc_descripcion = ? , tdc_deseado = ?, tdc_color = ? WHERE tdc_codigo = ?;", params ,
-                    (err,results) => {
-                        if (err) throw err;
-                        buscarTiposDebitoCredito(res,[{msg: "Actualizacion exitosa"}]);
-                    }
-                );
-            }else{
-                let params = [codigo,nombre,descripcion,naturaleza,deseado,color];
-                db.query("INSERT INTO Tipo_debito_credito(tdc_codigo,tdc_nombre,tdc_descripcion,tdc_naturaleza, tdc_deseado,tdc_color,tdc_fecha) VALUES (?,?,?,?,?,?,now());", params ,
-                    (err,results) => {
-                        if (err) throw err;
-                        buscarTiposDebitoCredito(res,[{msg: "Inserción exitosa"}]);
-                    }
-                );
-            }
-        }
-    }else{
-        req.checkBody("id","El codigo no puede ser nulo").notEmpty();
-        let errores = req.validationErrors();
-        if(errores)
-        buscarTiposDebitoCredito(res,errores);
-        else{
-            let params = [id];
-            db.query("DELETE FROM Tipo_debito_credito WHERE tdc_codigo = ?;", params ,
+    if(errores)
+        buscarTiposDebitoCredito(usuario,res,errores);
+    else {
+        if(submit == "mod"){
+            let params = [codigo,nombre,descripcion,deseado,color,consecutivo];
+            db.query("UPDATE Tipo_debito_credito SET tdc_codigo = ? ,tdc_nombre = ? , tdc_descripcion = ? , tdc_deseado = ?, tdc_color = ? WHERE tdc_consecutivo = ?;", params ,
                 (err,results) => {
                     if (err) throw err;
-                    buscarTiposDebitoCredito(res,[{msg: "Eliminación exitosa"}]);
+                    buscarTiposDebitoCredito(usuario,res,[{msg: res.__('Actualización exitosa')}]);
+                }
+            );
+        }else if(submit == "ins"){
+            let params = [codigo,usuario,nombre,descripcion,naturaleza,deseado,color];
+            db.query("INSERT INTO Tipo_debito_credito(tdc_codigo,u_usuario,tdc_nombre,tdc_descripcion,tdc_naturaleza, tdc_deseado,tdc_color,tdc_fecha) VALUES (?,?,?,?,?,?,?,now());", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarTiposDebitoCredito(usuario,res,[{msg: res.__('Inserción exitosa')}]);
+                }
+            );
+        } else{
+            let params = [consecutivo];
+            db.query("DELETE FROM Tipo_debito_credito WHERE tdc_consecutivo = ?;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarTiposDebitoCredito(usuario,res,[{msg: res.__('Eliminación exitosa')}]);
                 }
             );
         }
+
     }
-    
 });
 
 
-function buscarTiposDebitoCredito(res,errores){
-    db.query('SELECT tdc_codigo,tdc_nombre,tdc_descripcion,(tdc_deseado- tdc_promedio) tdc_balance, tdc_naturaleza,pm_descripcion tdc_naturalezaTexto,tdc_deseado,tdc_color ' +
+function buscarTiposDebitoCredito(usuario,res,errores){
+    db.query('SELECT tdc_consecutivo,tdc_codigo,tdc_nombre,tdc_descripcion,(tdc_deseado- tdc_promedio) tdc_balance, tdc_naturaleza,pm_descripcion tdc_naturalezaTexto,tdc_deseado,tdc_color ' +
      ' FROM Tipo_debito_credito LEFT JOIN Par_multivalor ' +
-     ' ON pm_tabla=\'DEB_CRE\' AND pm_codigo = tdc_naturaleza ORDER BY tdc_codigo', null, (err, results) => {
+     ' ON pm_tabla=\'DEB_CRE\' AND pm_codigo = tdc_naturaleza WHERE u_usuario = ? ORDER BY tdc_codigo', [usuario], (err, results) => {
         if (err){
             throw err;
         } 
@@ -159,7 +151,7 @@ function buscarTiposDebitoCredito(res,errores){
             if(err) throw err;
 
             if (results.length === 0) {
-                let errorNuevo = {msg: "No se encontraron registros"};
+                let errorNuevo = {msg: res.__('No se encontraron registros')};
                 if(errores)
                     errores.push(errorNuevo);
                 else
@@ -193,56 +185,44 @@ router.post("/parMultivalor",authenticationMiddleware(), (req,res) => {
 
     const { tabla , idTabla,  codigo ,  idCodigo , descripcion ,  numerico, texto, fecha, submit } = req.body;
 
+    req.checkBody(submit != "ins" ? "idTabla" : "tabla",res.__('La tabla no puede ser nula')).notEmpty();
+    req.checkBody(submit != "ins" ? "idCodigo" : "codigo",res.__('El código debe ser numérico')).isNumeric();
+    if( submit != "del"){
+        req.checkBody("descripcion",res.__('La descripción no puede ser nula')).notEmpty();
+        req.checkBody("numerico",res.__('El valor ingresado debe ser numérico')).optional({nullable: true , checkFalsy : true}).isNumeric();
+    }
 
-    if(submit != 'del'){
-        req.checkBody(submit == "mod" ? "idTabla" : "tabla","La tabla no puede ser nula").notEmpty();
-        req.checkBody(submit == "mod" ? "idCodigo" : "codigo","El codigo debe ser numerico").isNumeric();
-        req.checkBody("descripcion","La descripcion no puede ser nula").notEmpty();
-        if(numerico)
-            req.checkBody("numerico","El valor ingresado debe ser numérico").isNumeric();
+    let errores = req.validationErrors();
 
-        console.log(numerico);
-
-        
-        let errores = req.validationErrors();
-
-        if(errores)
-            buscarParMultivalores(res,errores);
-        else{
-            if(submit == "mod"){
-                let params = [descripcion,numerico,texto,fecha,idTabla,idCodigo];
-                db.query("UPDATE Par_Multivalor SET pm_descripcion = ? , pm_numerico = ? , pm_texto = ?, pm_fecha = ? WHERE pm_tabla = ? AND pm_codigo = ?;", params ,
-                    (err,results) => {
-                        if (err) throw err;
-                        buscarParMultivalores(res,[{msg: "Actualizacion exitosa"}]);
-                    }
-                );
-            }else{
-                let params = [tabla,codigo,descripcion,numerico,texto,fecha];
-                db.query("INSERT INTO Par_Multivalor(pm_tabla,pm_codigo,pm_descripcion,pm_numerico, pm_texto,pm_fecha) VALUES (?,?,?,?,?,?);", params ,
-                    (err,results) => {
-                        if (err) throw err;
-                        buscarParMultivalores(res,[{msg: "Inserción exitosa"}]);
-                    }
-                );
-            }
-        }
-    }else{
-        req.checkBody("idTabla" ,"La tabla no puede ser nula").notEmpty();
-        req.checkBody("idCodigo","El codigo no puede ser nulo").notEmpty();
-        let errores = req.validationErrors();
-        if(errores)
-            buscarParMultivalores(res,errores);
-        else{
+    if(errores)
+        buscarParMultivalores(res,errores);
+    else{
+        if(submit == "mod"){
+            let params = [descripcion,numerico,texto,fecha,idTabla,idCodigo];
+            db.query("UPDATE Par_Multivalor SET pm_descripcion = ? , pm_numerico = ? , pm_texto = ?, pm_fecha = ? WHERE pm_tabla = ? AND pm_codigo = ?;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarParMultivalores(res,[{msg: res.__('Actualización exitosa')}]);
+                }
+            );
+        }else if (submit == "ins"){
+            let params = [tabla,codigo,descripcion,numerico,texto,fecha];
+            db.query("INSERT INTO Par_Multivalor(pm_tabla,pm_codigo,pm_descripcion,pm_numerico, pm_texto,pm_fecha) VALUES (?,?,?,?,?,?);", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarParMultivalores(res,[{msg: res.__('Inserción exitosa')}]);
+                }
+            );
+        } else{
             let params = [idTabla,idCodigo];
             db.query("DELETE FROM Par_Multivalor WHERE pm_tabla = ? AND pm_codigo = ? ;", params ,
                 (err,results) => {
                     if (err) throw err;
-                    buscarParMultivalores(res,[{msg: "Eliminación exitosa"}]);
+                    buscarParMultivalores(res,[{msg: res.__('Eliminación exitosa')}]);
                 }
             );
         }
-    }
+    }     
     
 });
 
@@ -252,10 +232,8 @@ function buscarParMultivalores(res,errores){
         if (err){
             throw err;
         } 
-        
-
         if (results.length === 0) {
-            let errorNuevo = {msg: "No se encontraron registros"};
+            let errorNuevo = {msg: res.__('No se encontraron registros')};
             if(errores)
                 errores.push(errorNuevo);
             else
@@ -275,11 +253,101 @@ function obtenerParMultivalores(tabla, cb){
 }
 
 
+//Fuentes
 
 
+router.get("/fuente", authenticationMiddleware(), (req, res) => {
+    let usuario = req.session.passport.user;
+    buscarFuentes(usuario , res);
+});
+
+router.post("/fuente",authenticationMiddleware(), (req,res) => {
+
+    const {  consecutivo  , nombre , descripcion ,  fechaInicial , fechaFinal , submit } = req.body;
+    let usuario = req.session.passport.user;
+
+
+    if(submit != 'del'){
+        req.checkBody("nombre",res.__('El nombre no puede ser nulo')).notEmpty();
+        req.checkBody("fechaInicial",res.__('La fecha inicial no puede ser nula')).notEmpty();
+        req.checkBody("fechaFinal",res.__('La fecha inicial debe ser menor a la fecha final')).optional({nullable: true , checkFalsy: true}).isAfter(fechaInicial);
+    }
+    if(submit != 'ins')
+        req.checkBody("consecutivo",res.__('El identificador no puede ser nulo')).isNumeric();
+    
+        
+    let errores = req.validationErrors();
+
+    if(errores)
+        buscarFuentes(usuario,res,errores);
+    else{
+        if(submit == "mod"){
+            let params = [nombre,descripcion,fechaInicial,fechaFinal,consecutivo];
+            db.query("UPDATE fuente SET f_nombre = ? ,f_descripcion = ?, f_fecha_inicial = ? , f_fecha_final = ? WHERE f_consecutivo = ?;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarFuentes(usuario,res,[{msg: res.__('Actualización exitosa')}]);
+                }
+            );
+        }else if(submit == "ins"){
+            let params = [consecutivo,usuario,nombre,descripcion,fechaInicial,fechaFinal];
+            db.query("INSERT INTO fuente(f_consecutivo,u_usuario,f_nombre,f_descripcion,f_fecha_inicial,f_fecha_final) VALUES (?,?,?,?,?,?);", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarFuentes(usuario,res,[{msg:  res.__('Inserción exitosa')}]);
+                }
+            );
+        }
+        else{
+            let params = [consecutivo];
+            db.query("DELETE FROM fuente WHERE f_consecutivo = ? ;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarFuentes(usuario,res,[{msg:  res.__('Eliminación exitosa')}]);
+                }
+            );
+        }
+    }
+    
+});
+
+
+function buscarFuentes(usuario,res,errores){
+    db.query("SELECT f_consecutivo,f_nombre,f_descripcion, DATE_FORMAT(f_fecha_inicial, '%Y-%m-%d') as f_fecha_inicial , " +
+                " DATE_FORMAT(f_fecha_final, '%Y-%m-%d') as f_fecha_final FROM fuente WHERE u_usuario = ? ORDER BY f_nombre", [usuario], (err, results) => {
+        if (err){
+            throw err;
+        } 
+        
+        if (results.length === 0) {
+            let errorNuevo = {msg:  res.__('No se encontraron registros')};
+            if(errores)
+                errores.push(errorNuevo);
+            else
+                errores = [errorNuevo];
+            res.render("fuente", { active: "fuente",  errores});
+        } else {
+            res.render("fuente", { active: "fuente", results,  errores});
+        }
+    });
+}
 
 
 //Generalidades
+
+router.get("/cambioIdioma",(req, res) => {
+    console.log(res.getLocale());
+    if(res.locals.language == "es")
+        res.locals.language = "en";
+    else
+        res.locals.language = "es";
+    console.log(res.getLocale());
+    
+    if(req.isAuthenticated())
+        res.render("index",{ active: "index"});   
+    else
+        res.render("login", { titulo: res.__('Ingreso'), isLogin: true });
+});
 
 passport.serializeUser((user, done) => {
     done(null, user);

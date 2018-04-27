@@ -8,37 +8,37 @@
         </span >
         <div class="grid-x grid-margin-x">
             <div class="cell small-10 small-offset-1">
-               <h2 class="align-center">Par Multivalores</h2>
+               <h2 class="align-center">{{{__ "Par Multivalores"}}}</h2>
                 <form action="/parMultivalor" method="POST">
                     <label>
-                        Tabla
-                        <input id="tabla" type="text" name="tabla" maxlength="10" placeholder="Ingresa la tabla">
+                        {{{__ "Tabla"}}}
+                        <input id="tabla" type="text" name="tabla" maxlength="10" placeholder="{{{__ "Ingresa la tabla"}}}">
                         <input id="idTabla" type="text" name="idTabla" value="" style="display:none;">
                     </label>
                     <label>
-                        Codigo
-                        <input id="codigo" type="text" name="codigo" maxlength="10" placeholder="Ingresa el código">
+                        {{{__ "Código"}}}
+                        <input id="codigo" type="text" name="codigo" maxlength="10" placeholder="{{{__ "Ingresa el código"}}}">
                         <input id="idCodigo" type="text" name="idCodigo" value="" style="display:none;">
                     </label>
                     <label>
-                        Descripcion
-                        <input id="descripcion" type="text" name="descripcion" placeholder="Ingresa una descripcion">
+                        {{{__ "Descripción"}}}
+                        <input id="descripcion" type="text" name="descripcion" placeholder="{{{__ "Ingresa una descripción"}}}">
                     </label>
                     <label>
-                        Numero
-                        <input id="numerico" type="text" maxlength="11" name="numerico" placeholder="Ingresa el número">
+                        {{{__ "Número"}}}
+                        <input id="numerico" type="text" maxlength="11" name="numerico" placeholder="{{{__ "Ingresa el número"}}}">
                     </label>
                     <label>
-                        Texto
-                        <input id="texto" type="text"  name="texto" placeholder="Ingresa el texto">
+                        {{{__ "Texto"}}}
+                        <input id="texto" type="text"  name="texto" placeholder="{{{__ "Ingresa el texto"}}}">
                     </label>
                      <label>
-                        Fecha
-                        <input id="fecha" type="date"  name="fecha" placeholder="Ingresa el texto">
+                        {{{__ "Fecha"}}}
+                        <input id="fecha" type="date"  name="fecha" placeholder="{{{__ "Ingresa la fecha"}}}">
                     </label>
                     <div class="align-center">
-                        <button id="btn_mod" class="button" name="submit" type="submit" value="mod">Modificar</button>
-                        <button id="btn_del" class="button" name="submit" type="submit" value="del">Eliminar</button>
+                        <button id="btn_mod" class="button" name="submit" type="submit" value="mod">{{{__ "Modificar"}}}</button>
+                        <button id="btn_del" class="button" name="submit" type="submit" value="del">{{{__ "Eliminar"}}}</button>
                     </div>
                 </form>
             </div>
@@ -46,14 +46,14 @@
       </div>
       <div class="off-canvas-content" data-off-canvas-content>
         <div class="cell small-12 page-height">
-            <h2 class="align-center">Par Multivalores</h2>
+            <h2 class="align-center">{{{__ "Par Multivalores"}}}</h2>
 {{#if results}}
-            <input id="Busqueda" class="margin-left-40 width-20" type="text" placeholder="Busqueda">
+            <input id="Busqueda" class="margin-left-40 width-20" type="text" placeholder="{{{__ "Búsqueda"}}}">
             <table class="margin-left-10 width-80" >
                 <tr>
-                    <th>Tabla</th>
-                    <th>Codigo</th>
-                    <th>Descripcion</th>
+                    <th>{{{__ "Tabla"}}}</th>
+                    <th>{{{__ "Código"}}}</th>
+                    <th>{{{__ "Descripción"}}}</th>
                 </tr>
     {{#each results}}
                 <tr id="fila{{this.pm_tabla}}_{{this.pm_codigo}}" data-toggle="detalle" onclick="irADetalle('{{this.pm_tabla}}_{{this.pm_codigo}}');">
@@ -67,7 +67,7 @@
     {{/each}}
             </table>
 {{/if}}
-            <button type="button" class="button margin-left-35 width-30" data-toggle="detalle" onclick="irADetalle(null);">Ingresar</button>
+            <button type="button" class="button margin-left-35 width-30" data-toggle="detalle" onclick="irADetalle(null);">{{{__ "Ingresar"}}}</button>
         </div>
       </div>
     </div> 
@@ -81,9 +81,8 @@
     function irADetalle(codigo){
         var disabled = false;
         var displayDel = 'none';
-        var displayBal = 'none';
         var valBtn = "ins";
-        var htmlBtn = "Insertar";
+        var htmlBtn = '{{{__ "Insertar"}}}';
 
         if(!codigo){
             $('#tabla').val('');
@@ -110,9 +109,8 @@
 
             disabled = true;
             valBtn = "mod";
-            htmlBtn = "Modificar";
+            htmlBtn = '{{{__ "Modificar"}}}';
             displayDel = "inline-block";
-            displayBal = "block";
             
             }
             
@@ -130,11 +128,11 @@
                 if($( this ).attr('id')){
                     if($( this ).attr('id').match(/fila/) ) {
                         let fila = $(this).attr('id').replace("fila","");
-                        let valBusqueda =  $("#Busqueda" ).val();
+                        let valBusqueda =  $("#Busqueda" ).val().toUpperCase();
                         let regexBusqueda = new RegExp(valBusqueda,"g");
 
-                        if($('#tabla'+fila).html().match(regexBusqueda)
-                                || $('#descripcion'+fila).html().match(regexBusqueda) ){
+                        if($('#tabla'+fila).html().toUpperCase().match(regexBusqueda)
+                                || $('#descripcion'+fila).html().toUpperCase().match(regexBusqueda) ){
                             $(this).show();
             
                         }else{

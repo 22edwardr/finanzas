@@ -34,6 +34,20 @@ app.use(expressValidator());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//i18n
+
+var i18n = require("i18n");
+
+i18n.configure({
+  locales:['en', 'es'],
+  cookie: 'locale',
+  directory: __dirname + '/locales',
+  cookie : 'lenguaje',
+});
+
+app.use(i18n.init);
+
+
 
 let sessionStore;
 
@@ -87,7 +101,7 @@ passport.use(new LocalStrategy({
       const hash = results[0].u_clave.toString();
       bcrypt.compare(clave, hash, (err, response) => {
         if (response === true)
-          return done(null, { user_id: results[0].u_consecutivo });
+          return done(null,  results[0].u_consecutivo );
         else
           return done(null, false);
       });
@@ -119,5 +133,13 @@ hbs.registerPartials(__dirname + '/views/partials');
 hbs.registerHelper("json", function(context) {
   return JSON.stringify(context, null, 2);
 });
+
+hbs.registerHelper('__', function () {
+  return i18n.__.apply(this, arguments);
+});
+hbs.registerHelper('__n', function () {
+  return i18n.__n.apply(this, arguments);
+});
+
 
 module.exports = app;

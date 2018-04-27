@@ -13,7 +13,8 @@
             <div class="grid-container">
                 <div class="grid-x">
                     <div class="large-4 medium-6  large-offset-4  medium-offset-3 cell" style="background:rgba(255, 255, 255, 0.25);color: white;padding-top: 20pt;padding: 50pt 10pt 20pt 10pt;"> 
-                        <h1>{{ titulo }}</h1>
+                        <!--{{{__ "Hello"}}}{{{__n "%s cat" 3}}}{{{__ "Hello %s, how are you today?" "Pedrito"}}}-->
+                        <h1>{{titulo}}</h1>
                         {{#if errores}} 
                             {{#each errores}}
                             <div class="callout" data-closable>
@@ -27,46 +28,46 @@
                         {{#if isLogin}}
                             <form action="/Ingreso" method="POST">
                                 <label style="padding-top: 20pt;">
-                                    Usuario
-                                    <input type="text" name="usuario" placeholder="Ingresa tu usuario">
+                                    {{{__ "Usuario"}}}
+                                    <input type="text" name="usuario" placeholder="{{{__ "Ingresa tu usuario"}}}">
                                 </label>
                                 <label>
-                                    Clave
-                                    <input type="password" name="clave" placeholder="Ingresa tu clave">
+                                    {{{__ "Clave"}}}
+                                    <input type="password" name="clave" placeholder="{{{__ "Ingresa tu clave"}}}">
                                 </label>
                                 <div class="row">
                                     <div class="medium-12 medium-centered text-center columns" style="padding-top: 10pt;">
-                                        <button class="button" type="submit" value="Submit">Ingresar</button>
-                                        <button class="button" name="LoginToggle" type="submit" value="Registro" formaction="/LoginToggle">Registro</button>
+                                        <button class="button" type="submit" value="Submit">{{{__ "Ingresar"}}}</button>
+                                        <button class="button" name="LoginToggle" type="submit" value="Registro" formaction="/LoginToggle">{{{__ "Registro"}}}</button>
                                     </div>
                                 </div>
                             </form>
                         {{else}}
                             <form action="/Registro" method="POST">
                                 <label style="padding-top: 20pt;">
-                                    Usuario
-                                    <input type="text" name="usuario" placeholder="Ingresa tu usuario">
+                                    {{{__ "Usuario"}}}
+                                    <input type="text" name="usuario" placeholder="{{{__ "Ingresa tu usuario"}}}">
                                 </label>
                                 <label>
-                                    Nombre
-                                    <input type="text" name="nombre" placeholder="Ingresa tu nombre">
+                                    {{{__ "Nombre"}}}
+                                    <input type="text" name="nombre" placeholder="{{{__ "Ingresa tu clave"}}}">
                                 </label>
                                 <label>
-                                    Correo
-                                    <input type="text" name="correo" placeholder="Ingresa tu correo">
+                                    {{{__ "Correo"}}}
+                                    <input type="text" name="correo" placeholder="{{{__ "Ingresa tu correo"}}}">
                                 </label>
                                 <label>
-                                    Clave
-                                    <input type="password" name="clave" placeholder="Ingresa tu clave">
+                                    {{{__ "Clave"}}}
+                                    <input type="password" name="clave" placeholder="{{{__ "Ingresa tu clave"}}}">
                                 </label>
                                 <label>
-                                    Clave
-                                    <input type="password" name="clave2" placeholder="Confirma tu clave">
+                                    {{{__ "Clave"}}}
+                                    <input type="password" name="clave2" placeholder="{{{__ "Confirma tu clave"}}}">
                                 </label>
                                 <div class="row">
                                     <div class="medium-12 medium-centered text-center columns" style="padding-top: 10pt;">
-                                        <button class="button" type="submit" value="Submit">Registrate</button>
-                                        <button class="button" name="LoginToggle" type="submit" value="Login" formaction="/LoginToggle">Logueate</button>
+                                        <button class="button" type="submit" value="Submit">{{{__ "Registrate"}}}</button>
+                                        <button class="button" name="LoginToggle" type="submit" value="Login" formaction="/LoginToggle">{{{__ "Logueate"}}}</button>
                                     </div>
                                 </div>
                             </form>                                              
