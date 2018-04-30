@@ -40,9 +40,8 @@ var i18n = require("i18n");
 
 i18n.configure({
   locales:['en', 'es'],
-  cookie: 'locale',
   directory: __dirname + '/locales',
-  cookie : 'lenguaje',
+  cookie : 'i18n'
 });
 
 app.use(i18n.init);

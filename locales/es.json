@@ -74,5 +74,11 @@
 	"La descripción no puede ser nula": "La descripción no puede ser nula",
 	"El valor ingresado debe ser numérico": "El valor ingresado debe ser numérico",
 	"La fecha inicial no puede ser nula": "La fecha inicial no puede ser nula",
-	"La fecha inicial debe ser menor a la fecha final": "La fecha inicial debe ser menor a la fecha final"
+	"La fecha inicial debe ser menor a la fecha final": "La fecha inicial debe ser menor a la fecha final",
+	"Débito Crédito": "Débito Crédito",
+	"Tipo Débito Credito": "Tipo Débito Credito",
+	"El tipo no puede ser nulo": "El tipo no puede ser nulo",
+	"Cerrar Sesión": "Cerrar Sesión",
+	"EN": "EN",
+	"ES": "ES"
 }

@@ -15,12 +15,13 @@
 
     <ul class="vertical menu accordion-menu" data-accordion-menu>
     <li id="index" class="opcion">
-      <a href="/cambioIdioma">{{{__ "Inicio"}}}</a>
+      <a href="/">{{{__ "Inicio"}}}</a>
     </li>
     <li>
       <a href="#">{{{__ "Parametros"}}}</a>
       <ul class="menu vertical nested">
         <li id="tipoDebitoCredito" class="opcion" ><a  href="/tipoDebitoCredito">{{{__ "Tipos Débito Crédito"}}}</a></li>
+        <li id="debitoCredito" class="opcion" ><a  href="/debitoCredito">{{{__ "Débito Crédito"}}}</a></li>
         <li id="parMultivalor" class="opcion" ><a  href="/parMultivalor">{{{__ "Par Multivalores"}}}</a></li>
         <li id="fuente" class="opcion" ><a  href="/fuente">{{{__ "Fuentes"}}}</a></li>
       </ul>
@@ -41,6 +42,12 @@
         </ul>
       </div>
       <div class="top-bar-right">
+        <ul class="dropdown menu" data-dropdown-menu>
+          <!--Top bar items -->
+          <li><a href="/cambioIdioma?lang=en"><img src="images/britishflag.png" alt="{{{__ "EN"}}}"></a></li>
+          <li><a href="/cambioIdioma?lang=es"><img src="images/spainflag.png" alt="{{{__ "ES"}}}"></a></li>
+          <li><a href="/logout">{{{__ "Cerrar Sesión"}}}</a></li>
+        </ul>
       </div>
     </div>
     {{#if errores}} 

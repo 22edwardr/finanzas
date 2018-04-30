@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
+var i18n = require('i18n')
 const expressValidator = require("express-validator");
 const passport = require("passport");
 const bcrypt = require('bcrypt')
-
 const db = require("../db");
 const saltRounds = 10; 
+
 
 
 
@@ -27,7 +28,13 @@ router.post("/LoginToggle", (req, res) => {
 });
 
 router.get("/", authenticationMiddleware(), (req,res) => {
+    if(req.cookies.i18n == undefined)
+        res.setLocale('en')
+    else
+        res.setLocale(req.cookies.i18n)
+    
     console.log(req.isAuthenticated());
+
     res.render("index",{ active: "index"});   
 });
 
@@ -165,6 +172,105 @@ function buscarTiposDebitoCredito(usuario,res,errores){
                         results[i].tdc_color_balance = "green";
                 }
                 res.render("tipoDebitoCredito", { active: "tipoDebitoCredito", results, naturalezas, errores});
+            }
+        });
+    });
+}
+
+function obtenerTiposDebitoCredito(usuario, cb){
+    let parameters = [usuario];
+    console.log(usuario);
+    db.query('SELECT * FROM Tipo_Debito_Credito WHERE u_usuario = ?', parameters, (err, results) => {
+        cb(err,results);
+    });
+}
+
+
+
+
+//Debito Credito
+
+router.get("/debitoCredito", authenticationMiddleware(), (req, res) => {
+    let usuario = req.session.passport.user;
+    buscarDebitosCredito(usuario,res);
+});
+
+router.post("/debitoCredito",authenticationMiddleware(), (req,res) => {
+    const { consecutivo ,  nombre ,  descripcion , tipo ,  color, deseado, balance, submit } = req.body;
+    let usuario = req.session.passport.user;
+
+    if( submit != "del"){
+        req.checkBody("nombre",res.__('El nombre no puede ser nulo')).notEmpty();
+        req.checkBody("tipo",res.__('El tipo no puede ser nulo')).isNumeric();
+        req.checkBody("color",res.__('El color es inválido')).matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/);
+        req.checkBody("deseado",res.__('El valor deseado debe ser numérico')).isNumeric();
+        
+    }
+
+    if(submit != 'ins')
+        req.checkBody("consecutivo",res.__('El identificador no puede ser nulo')).isNumeric();
+    
+    let errores = req.validationErrors();
+
+    if(errores)
+        buscarDebitosCredito(usuario,res,errores);
+    else {
+        if(submit == "mod"){
+            let params = [nombre,descripcion,tipo,deseado,color,consecutivo];
+            db.query("UPDATE Debito_credito SET dc_nombre = ? , dc_descripcion = ? , tdc_tipo_debito_credito = ? , dc_deseado = ?, dc_color = ? WHERE dc_consecutivo = ?;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarDebitosCredito(usuario,res,[{msg: res.__('Actualización exitosa')}]);
+                }
+            );
+        }else if(submit == "ins"){
+            let params = [nombre,descripcion,tipo,deseado,color];
+            db.query("INSERT INTO Debito_credito(dc_nombre,dc_descripcion,tdc_tipo_debito_credito, dc_deseado,dc_color,dc_fecha) VALUES (?,?,?,?,?,now());", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarDebitosCredito(usuario,res,[{msg: res.__('Inserción exitosa')}]);
+                }
+            );
+        } else{
+            let params = [consecutivo];
+            db.query("DELETE FROM Debito_credito WHERE dc_consecutivo = ?;", params ,
+                (err,results) => {
+                    if (err) throw err;
+                    buscarDebitosCredito(usuario,res,[{msg: res.__('Eliminación exitosa')}]);
+                }
+            );
+        }
+
+    }
+});
+
+
+function buscarDebitosCredito(usuario,res,errores){
+    db.query('SELECT dc_consecutivo,dc_nombre,dc_descripcion,(dc_deseado- dc_promedio) dc_balance, tdc_tipo_debito_credito dc_tipo,tdc_nombre dc_tipoTexto,dc_deseado,dc_color ' +
+     ' FROM Debito_Credito JOIN Tipo_Debito_Credito ' +
+     ' ON tdc_consecutivo = tdc_tipo_debito_credito WHERE u_usuario = ? ORDER BY dc_nombre', [usuario], (err, results) => {
+        if (err){
+            throw err;
+        } 
+        
+        obtenerTiposDebitoCredito(usuario,(err,tiposDebitoCredito) => {
+            if(err) throw err;
+
+            if (results.length === 0) {
+                let errorNuevo = {msg: res.__('No se encontraron registros')};
+                if(errores)
+                    errores.push(errorNuevo);
+                else
+                    errores = [errorNuevo];
+                res.render("debitoCredito", { active: "debitoCredito", tiposDebitoCredito, errores});
+            } else {
+                for(let i=0 ; i<results.length ; i++){
+                    if(results[i].tdc_balance < 0)
+                        results[i].dc_color_balance = "red";
+                    else
+                        results[i].dc_color_balance = "green";
+                }
+                res.render("debitoCredito", { active: "debitoCredito", results, tiposDebitoCredito, errores});
             }
         });
     });
@@ -336,17 +442,8 @@ function buscarFuentes(usuario,res,errores){
 //Generalidades
 
 router.get("/cambioIdioma",(req, res) => {
-    console.log(res.getLocale());
-    if(res.locals.language == "es")
-        res.locals.language = "en";
-    else
-        res.locals.language = "es";
-    console.log(res.getLocale());
-    
-    if(req.isAuthenticated())
-        res.render("index",{ active: "index"});   
-    else
-        res.render("login", { titulo: res.__('Ingreso'), isLogin: true });
+    res.cookie('i18n',req.query.lang);
+    res.redirect("/");
 });
 
 passport.serializeUser((user, done) => {

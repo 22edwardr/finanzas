@@ -1,5 +1,5 @@
 {
-    "Hello": "Hello",
+	"Hello": "Hello",
 	"%s cat": {
 		"one": "%s cat",
 		"other": "%s cat"
@@ -74,5 +74,10 @@
 	"La descripción no puede ser nula": "The description can't be empty",
 	"El valor ingresado debe ser numérico": "The number entered must be numeric",
 	"La fecha inicial no puede ser nula": "The initial date can't be empty",
-	"La fecha inicial debe ser menor a la fecha final": "The initial date must be lower than the end date"
+	"La fecha inicial debe ser menor a la fecha final": "The initial date must be lower than the end date",
+	"Débito Crédito": "Debit Credit",
+	"EN": "EN",
+	"ES": "ES",
+	"Cerrar Sesión": "Logout",
+	"Tipo Débito Credito": "Debit Credit Types"
 }

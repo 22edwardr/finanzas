@@ -8,14 +8,10 @@
         </span >
         <div class="grid-x grid-margin-x">
             <div class="cell small-10 small-offset-1">
-               <h2 class="align-center">{{{__ "Tipos Débito Crédito"}}}</h2>
-                <form action="/tipoDebitoCredito" method="POST">
+               <h2 class="align-center">{{{__ "Débito Crédito"}}}</h2>
+                <form action="/debitoCredito" method="POST">
                     <label>
-                        {{{__ "Código"}}}
-                        <input id="codigo" type="text" name="codigo" maxlength="3" placeholder="{{{__ "Ingresa el código"}}}">
                         <input id="consecutivo" type="text" name="consecutivo" value="" style="display:none;">
-                    </label>
-                    <label>
                         {{{__ "Nombre"}}}
                         <input id="nombre" type="text" name="nombre" placeholder="{{{__ "Ingresa el nombre"}}}">
                     </label>
@@ -24,10 +20,10 @@
                         <input id="descripcion" type="text" name="descripcion" placeholder="{{{__ "Ingresa una descripción"}}}">
                     </label>
                     <label>
-                        {{{__ "Naturaleza"}}}
-                        <select id="naturaleza" name="naturaleza">
-                            {{#each naturalezas}}
-                                <option value="{{this.pm_codigo}}">{{this.pm_descripcion}}</option>
+                        {{{__ "Tipo Débito Credito"}}}
+                        <select id="tipo" name="tipo">
+                            {{#each tiposDebitoCredito}}
+                                <option value="{{this.tdc_consecutivo}}">{{this.tdc_nombre}}</option>
                             {{/each}}
                         </select>
                     </label>
@@ -53,26 +49,24 @@
       </div>
       <div class="off-canvas-content" data-off-canvas-content>
         <div class="cell small-12 page-height">
-            <h2 class="align-center">{{{__ "Tipos Débito Crédito"}}}</h2>
+            <h2 class="align-center">{{{__ "Débito Crédito"}}}</h2>
 {{#if results}}
             <input id="Busqueda" class="margin-left-40 width-20" type="text" placeholder="Busqueda">
             <table class="margin-left-10 width-80" >
                 <tr>
-                    <th>{{{__ "Código"}}}</th>
-                    <th>{{{__ "Nombre"}}}</th>
-                    <th>{{{__ "Naturaleza"}}}</th>
-                    <th>{{{__ "Balance"}}}</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Balance</th>
                 </tr>
     {{#each results}}
-                <tr id="fila{{this.tdc_consecutivo}}" data-toggle="detalle" onclick="irADetalle({{this.tdc_consecutivo}});">
-                    <td id="codigo{{this.tdc_consecutivo}}">{{this.tdc_codigo}}</td>
-                    <td id="nombre{{this.tdc_consecutivo}}">{{this.tdc_nombre}}</td>
-                    <td id="naturalezaTexto{{this.tdc_consecutivo}}">{{this.tdc_naturalezaTexto}}</td>
-                    <td id="balance{{this.tdc_consecutivo}}" style="color:{{this.tdc_color_balance}}">{{this.tdc_balance}}</td>
-                    <td id="naturaleza{{this.tdc_consecutivo}}" style="display:none;">{{this.tdc_naturaleza}}</td>
-                    <td id="color{{this.tdc_consecutivo}}" style="display:none;">{{this.tdc_color}}</td>
-                    <td id="deseado{{this.tdc_consecutivo}}" style="display:none;">{{this.tdc_deseado}}</td>
-                    <td id="descripcion{{this.tdc_consecutivo}}" style="display:none;">{{this.tdc_descripcion}}</td>
+                <tr id="fila{{this.dc_consecutivo}}" data-toggle="detalle" onclick="irADetalle({{this.dc_consecutivo}});">
+                    <td id="nombre{{this.dc_consecutivo}}">{{this.dc_nombre}}</td>
+                    <td id="tipoTexto{{this.dc_consecutivo}}">{{this.dc_tipoTexto}}</td>
+                    <td id="balance{{this.dc_consecutivo}}" style="color:{{this.dc_color_balance}}">{{this.dc_balance}}</td>
+                    <td id="tipo{{this.dc_consecutivo}}" style="display:none;">{{this.dc_tipo}}</td>
+                    <td id="color{{this.dc_consecutivo}}" style="display:none;">{{this.dc_color}}</td>
+                    <td id="deseado{{this.dc_consecutivo}}" style="display:none;">{{this.dc_deseado}}</td>
+                    <td id="descripcion{{this.dc_consecutivo}}" style="display:none;">{{this.dc_descripcion}}</td>
                 </tr>
     {{/each}}
             </table>
@@ -89,35 +83,30 @@
 
 <script>
     function irADetalle(codigo){
-        var disabled = false;
         var displayDel = 'none';
         var displayBal = 'none';
         var valBtn = "ins";
         var htmlBtn = '{{{__ "Insertar"}}}';
 
         if(!codigo){
-            $('#codigo').val('');
             $('#consecutivo').val('');
             $('#nombre').val('');
             $('#balance').val('');
             $('#color').val('');
             $('#deseado').val('');
             $('#descripcion').val('');
-            $('#naturaleza').val('');
+            $('#tipo').val('');
 
 
         }else{
-             $('#codigo').val($('#codigo'+codigo).html());
              $('#consecutivo').val(codigo);
              $('#nombre').val($('#nombre'+codigo).html());
              $('#balance').val($('#balance'+codigo).html());
              $('#color').val($('#color'+codigo).html());
              $('#deseado').val($('#deseado'+codigo).html());
              $('#descripcion').val($('#descripcion'+codigo).html());
-             $('#naturaleza').val($('#naturaleza'+codigo).html());
+             $('#tipo').val($('#tipo'+codigo).html());
 
-
-            disabled = true;
             valBtn = "mod";
             htmlBtn = '{{{__ "Modificar"}}}';
             displayDel = "inline-block";
@@ -125,7 +114,6 @@
             
             }
             
-            $('#naturaleza').prop("disabled",disabled);
             $('#btn_mod').val(valBtn);
             $('#btn_mod').html(htmlBtn);
             $('#btn_del').css({'display' : displayDel});
@@ -142,8 +130,8 @@
                         let valBusqueda =  $("#Busqueda" ).val().toUpperCase();
                         let regexBusqueda = new RegExp(valBusqueda,"g");
 
-                        if($('#codigo'+fila).html().toUpperCase().match(regexBusqueda)
-                                || $('#nombre'+fila).html().toUpperCase().match(regexBusqueda) ){
+                        if($('#nombre'+fila).html().toUpperCase().match(regexBusqueda)
+                                || $('#tipoTexto'+fila).html().toUpperCase().match(regexBusqueda) ){
                             $(this).show();
             
                         }else{
