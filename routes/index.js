@@ -438,11 +438,22 @@ function buscarFuentes(usuario,res,errores){
     });
 }
 
+
+function obtenerFuentes(usuario, cb){
+    let parameters = [usuario];
+    db.query('SELECT count(m_consecutivo) popular,f_consecutivo,f_nombre FROM Fuente f LEFT JOIN Movimiento m ' +
+    + ' ON f_fuente=f_consecutivo WHERE f.u_usuario = ? GROUP BY f_consecutivo,f_nombre ORDER BY popular desc ', parameters, (err, results) => {
+        cb(err,results);
+    });
+}
+
 //Movimiento
 
 router.get("/movimiento", authenticationMiddleware(), (req,res) => {
-
-    res.render("movimiento",{ active: "movimiento"});   
+    let usuario = req.session.passport.user;
+    obtenerFuentes(usuario,(err,fuentes) => {
+        
+    });
 });
 
 //Generalidades

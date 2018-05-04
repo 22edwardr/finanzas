@@ -34,29 +34,10 @@
 {{> footer }}
 
 <script>
-/*
-<label>
-                {{{__ "Nombre"}}}
-                <input id="nombre" type="text" name="nombre" placeholder="{{{__ "Ingresa un nombre"}}}">
-                <input id="consecutivo" type="text" name="consecutivo" value="" style="display:none;">
-            </label>
-            <label>
-                {{{__ "Descripción"}}}
-                <input id="descripcion" type="text" name="descripcion" placeholder="{{{__ "Ingresa una descripción"}}}">
-            </label>
-                <label>
-                {{{__ "Fecha Inicial"}}}
-                <input id="fechaInicial" type="date"  name="fechaInicial" placeholder="{{{__ "Ingresa la fecha inicial"}}}">
-            </label>
-                <label>
-                {{{__ "Fecha Final"}}}
-                <input id="fechaFinal" type="date"  name="fechaFinal" placeholder="{{{__ "Ingresa la fecha final"}}}">
-            </label>
-            <div class="align-center">
-                <button id="btn_mod" class="button" name="submit" type="submit" value="mod">{{{__ "Modificar"}}}</button>
-                <button id="btn_del" class="button" name="submit" type="submit" value="del">{{{__ "Eliminar"}}}</button>
-            </div>*/
-
+    $(function(){
+        
+        
+    });
     var filas = 0;
     var fuentes = $('<select/>');
     var tiposDebitoCredito = $('<select/>');
@@ -195,11 +176,6 @@
 
         $('#datos').append(nuevaFila);
     }
-
-    $(function(){
-        
-        
-    });
 </script>
 </body>
 </html>
