@@ -438,6 +438,12 @@ function buscarFuentes(usuario,res,errores){
     });
 }
 
+//Movimiento
+
+router.get("/movimiento", authenticationMiddleware(), (req,res) => {
+
+    res.render("movimiento",{ active: "movimiento"});   
+});
 
 //Generalidades
 

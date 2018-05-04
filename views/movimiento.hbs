@@ -1,0 +1,205 @@
+{{> header }}
+<form action="/movimiento" method="POST">
+<div class="grid-container" style="min-width: 100%;padding:1% 5% 1% 5%;">
+    <div class="grid-x grid-margin-x">
+        <div class="medium-12 cell">
+            <h2 class="align-center">{{{__ "Movimiento"}}}</h2>
+        </div>
+        
+        <div class="medium-12 cell" id="datos">
+            
+        </div>
+        <div class="medium-12 cell" id="totales">
+            <div class="grid-x grid-margin-x">
+                <div class="medium-1 cell medium-offset-9">
+                    <p>{{{__ "Subtotal"}}}</p>
+                </div>
+                <div class="medium-1 cell">
+                    <input id="subtotal" type="text" name="subtotal" disabled>
+                </div>
+                <div class="medium-1 cell">
+                    <a href="#" id="agregar" class="button" onclick="agregarFila();">{{{__ "+"}}}</a>
+                </div> 
+            </div>
+            <div class="grid-x grid-margin-x">
+                <div class="medium-12 cell">
+                    <button id="submit" class="button margin-left-40 width-20" name="submit" type="submit" value="del">{{{__ "Ingresar"}}}</button>
+                </div>
+            </div>               
+        </div>             
+    </div>
+</div>
+</form>
+    
+{{> footer }}
+
+<script>
+/*
+<label>
+                {{{__ "Nombre"}}}
+                <input id="nombre" type="text" name="nombre" placeholder="{{{__ "Ingresa un nombre"}}}">
+                <input id="consecutivo" type="text" name="consecutivo" value="" style="display:none;">
+            </label>
+            <label>
+                {{{__ "Descripción"}}}
+                <input id="descripcion" type="text" name="descripcion" placeholder="{{{__ "Ingresa una descripción"}}}">
+            </label>
+                <label>
+                {{{__ "Fecha Inicial"}}}
+                <input id="fechaInicial" type="date"  name="fechaInicial" placeholder="{{{__ "Ingresa la fecha inicial"}}}">
+            </label>
+                <label>
+                {{{__ "Fecha Final"}}}
+                <input id="fechaFinal" type="date"  name="fechaFinal" placeholder="{{{__ "Ingresa la fecha final"}}}">
+            </label>
+            <div class="align-center">
+                <button id="btn_mod" class="button" name="submit" type="submit" value="mod">{{{__ "Modificar"}}}</button>
+                <button id="btn_del" class="button" name="submit" type="submit" value="del">{{{__ "Eliminar"}}}</button>
+            </div>*/
+
+    var filas = 0;
+    var fuentes = $('<select/>');
+    var tiposDebitoCredito = $('<select/>');
+
+{{#if fuentes}}
+    {{#each fuentes}}
+    var optionFuente = $('<option/>');
+    optionFuente.attr('value','{{this.f_consecutivo}}');
+    optionFuente.attr('text','{{this.f_nombre}}');
+    fuentes.append(optionFuente);
+    {{/each}}
+{{/if}}
+
+{{#if tiposDebitoCredito}}
+    {{#each tiposDebitoCredito}}
+    var optionTipoDebitoCredito = $('<option/>');
+    optionTipoDebitoCredito.attr('value','{{this.tdc_consecutivo}}');
+    optionTipoDebitoCredito.attr('text','{{this.tdc_nombre}}');
+    tiposDebitoCredito.append(optionTipoDebitoCredito);
+    {{/each}}
+{{/if}}
+
+
+    function agregarFila(){
+        var nuevaFila = $('<div/>');
+        nuevaFila.attr('id',"fila" + ++filas);
+        nuevaFila.addClass('grid-x grid-margin-x');
+
+
+        var nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-1 cell');
+        var nuevoElemento = $('<input/>');
+        nuevoElemento.attr('id','fecha' + filas);
+        nuevoElemento.attr('type','date');
+        nuevoElemento.attr('name','fecha' + filas);
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-1 cell');
+        var fuente = fuentes.clone();
+        fuente.attr('id','fuente' + filas);
+        fuente.attr('name','fuente' + filas);
+        nuevoContenedor.append(fuente);
+
+
+        nuevaFila.append(nuevoContenedor);
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-2 cell');
+        var tipoDebitoCredito = tiposDebitoCredito.clone();
+        tipoDebitoCredito.attr('id','tipoDebitoCredito' + filas);
+        tipoDebitoCredito.attr('name','tipoDebitoCredito' + filas);
+        nuevoContenedor.append(tipoDebitoCredito);
+
+
+        nuevaFila.append(nuevoContenedor);
+
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-2 cell');
+        nuevoElemento = $('<input/>');
+        nuevoElemento.attr('id','debitoCredito' + filas);
+        nuevoElemento.attr('type','text');
+        nuevoElemento.attr('name','debitoCredito' + filas);
+        nuevoElemento.attr('placeholder','{{{__ "Producto"}}}');
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-1 cell');
+        nuevoElemento = $('<input/>');
+        nuevoElemento.attr('id','nombre' + filas);
+        nuevoElemento.attr('type','text');
+        nuevoElemento.attr('name','nombre' + filas);
+        nuevoElemento.attr('placeholder','{{{__ "Nombre"}}}');
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-2 cell');
+        nuevoElemento = $('<input/>');
+        nuevoElemento.attr('id','descripcion' + filas);
+        nuevoElemento.attr('type','text');
+        nuevoElemento.attr('name','descripcion' + filas);
+        nuevoElemento.attr('placeholder','{{{__ "Descripción"}}}');
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-1 cell');
+        nuevoElemento = $('<input/>');
+        nuevoElemento.attr('id','cantidad' + filas);
+        nuevoElemento.attr('type','text');
+        nuevoElemento.attr('name','cantidad' + filas);
+        nuevoElemento.attr('length',2);
+        nuevoElemento.attr('placeholder','{{{__ "Cantidad"}}}');
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-1 cell');
+        nuevoElemento = $('<input/>');
+        nuevoElemento.attr('id','valor' + filas);
+        nuevoElemento.attr('type','text');
+        nuevoElemento.attr('name','valor' + filas);
+        nuevoElemento.attr('length',9);
+        nuevoElemento.attr('placeholder','{{{__ "Valor"}}}');
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+        nuevoContenedor = $('<div/>');
+        nuevoContenedor.addClass('medium-1 cell');
+        nuevoElemento = $('<a/>');
+        nuevoElemento.attr('href','#');
+        nuevoElemento.attr('id','eliminar' + filas);
+        nuevoElemento.addClass('button');
+        nuevoElemento.attr('id','eliminar' + filas);
+        nuevoElemento.click(function(){
+            let fila = $(this).attr('id').replace("eliminar","");
+            $('#fila'+fila).remove();
+        });
+        nuevoElemento.html('{{{__ "-"}}}');
+
+        nuevoContenedor.append(nuevoElemento);
+
+        nuevaFila.append(nuevoContenedor);
+
+
+        $('#datos').append(nuevaFila);
+    }
+
+    $(function(){
+        
+        
+    });
+</script>
+</body>
+</html>

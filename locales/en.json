@@ -79,5 +79,12 @@
 	"EN": "EN",
 	"ES": "ES",
 	"Cerrar Sesión": "Logout",
-	"Tipo Débito Credito": "Debit Credit Types"
+	"Tipo Débito Credito": "Debit Credit Types",
+	"Movimiento": "Finantial move",
+	"Subtotal": "Subtotal",
+	"+": "+",
+	"Producto": "Product",
+	"Cantidad": "Quantity",
+	"Valor": "Value",
+	"-": "-"
 }

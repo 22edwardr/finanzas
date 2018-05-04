@@ -80,5 +80,12 @@
 	"El tipo no puede ser nulo": "El tipo no puede ser nulo",
 	"Cerrar Sesión": "Cerrar Sesión",
 	"EN": "EN",
-	"ES": "ES"
+	"ES": "ES",
+	"Movimiento": "Movimiento",
+	"Subtotal": "Subtotal",
+	"+": "+",
+	"Producto": "Producto",
+	"Cantidad": "Cantidad",
+	"Valor": "Valor",
+	"-": "-"
 }
