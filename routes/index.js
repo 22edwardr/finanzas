@@ -185,6 +185,13 @@ function obtenerTiposDebitoCredito(usuario, cb){
     });
 }
 
+function obtenerTiposDebitoCreditoOrdenPopular(usuario, cb){
+    let parameters = [usuario];
+    console.log(usuario);
+    db.query('SELECT count(tdc_consecutivo) popular,tdc_consecutivo,tdc_codigo FROM tipo_debito_credito tdc JOIN debito_credito dc  ON tdc_tipo_debito_credito=tdc_consecutivo LEFT JOIN movimiento m ON m.dc_debito_credito=dc_consecutivo WHERE tdc.u_usuario = 1 GROUP BY tdc_consecutivo,tdc_codigo ORDER BY popular desc', parameters, (err, results) => {
+        cb(err,results);
+    });
+}
 
 
 
@@ -276,6 +283,12 @@ function buscarDebitosCredito(usuario,res,errores){
     });
 }
 
+function buscarDebitosCreditoPorTipo(tipo, cb){
+    let parameters = [tipo];
+    db.query('SELECT * FROM Debito_Credito WHERE tdc_tipo_debito_credito = ? ORDER BY dc_nombre ', parameters, (err, results) => {
+        cb(err,results);
+    });
+}
 
 
 
@@ -441,8 +454,8 @@ function buscarFuentes(usuario,res,errores){
 
 function obtenerFuentes(usuario, cb){
     let parameters = [usuario];
-    db.query('SELECT count(m_consecutivo) popular,f_consecutivo,f_nombre FROM Fuente f LEFT JOIN Movimiento m ' +
-    + ' ON f_fuente=f_consecutivo WHERE f.u_usuario = ? GROUP BY f_consecutivo,f_nombre ORDER BY popular desc ', parameters, (err, results) => {
+    db.query('SELECT count(m_consecutivo) popular,f_consecutivo,f_nombre FROM Fuente f LEFT JOIN Movimiento m  ON f_fuente=f_consecutivo WHERE f.u_usuario = ? GROUP BY f_consecutivo,f_nombre ORDER BY popular desc ', 
+    parameters, (err, results) => {
         cb(err,results);
     });
 }
@@ -451,8 +464,41 @@ function obtenerFuentes(usuario, cb){
 
 router.get("/movimiento", authenticationMiddleware(), (req,res) => {
     let usuario = req.session.passport.user;
+    errores = [];
     obtenerFuentes(usuario,(err,fuentes) => {
+        if(err) throw err;
+            if (fuentes.length === 0) {
+                let errorNuevo = {msg: res.__('No se encontraron fuentes')};
+                if(errores)
+                    errores.push(errorNuevo);
+                else
+                    errores = [errorNuevo];
+                res.render("movimiento", { active: "movimiento" , errores});
+            } else {
+                obtenerTiposDebitoCreditoOrdenPopular(usuario,(err,tiposDebitoCredito) => {
+                    if(err) throw err;
         
+                    if (tiposDebitoCredito.length === 0) {
+                        let errorNuevo = {msg: res.__('No se encontraron Tipos Débito Crédito')};
+                        if(errores)
+                            errores.push(errorNuevo);
+                        else
+                            errores = [errorNuevo];
+                        res.render("movimiento", { active: "movimiento", fuentes, errores});
+                    } else {
+                        res.render("movimiento", { active: "movimiento", tiposDebitoCredito, fuentes , errores});
+                    }
+                });
+            }
+    });
+});
+
+router.get('/movimiento/debitoCredito/:tipo', function(req, res){ 
+    let tipo = req.params.tipo;
+
+    buscarDebitosCreditoPorTipo(tipo,(err,debitosCreditos) => {
+        if (err) throw err;
+        res.json(debitosCreditos);
     });
 });
 

@@ -46,7 +46,7 @@
     {{#each fuentes}}
     var optionFuente = $('<option/>');
     optionFuente.attr('value','{{this.f_consecutivo}}');
-    optionFuente.attr('text','{{this.f_nombre}}');
+    optionFuente.html('{{this.f_nombre}}');
     fuentes.append(optionFuente);
     {{/each}}
 {{/if}}
@@ -55,7 +55,7 @@
     {{#each tiposDebitoCredito}}
     var optionTipoDebitoCredito = $('<option/>');
     optionTipoDebitoCredito.attr('value','{{this.tdc_consecutivo}}');
-    optionTipoDebitoCredito.attr('text','{{this.tdc_nombre}}');
+    optionTipoDebitoCredito.html('{{this.tdc_codigo}}');
     tiposDebitoCredito.append(optionTipoDebitoCredito);
     {{/each}}
 {{/if}}
@@ -68,7 +68,7 @@
 
 
         var nuevoContenedor = $('<div/>');
-        nuevoContenedor.addClass('medium-1 cell');
+        nuevoContenedor.addClass('medium-2 cell');
         var nuevoElemento = $('<input/>');
         nuevoElemento.attr('id','fecha' + filas);
         nuevoElemento.attr('type','date');
@@ -79,7 +79,7 @@
 
 
         nuevoContenedor = $('<div/>');
-        nuevoContenedor.addClass('medium-1 cell');
+        nuevoContenedor.addClass('medium-2 cell');
         var fuente = fuentes.clone();
         fuente.attr('id','fuente' + filas);
         fuente.attr('name','fuente' + filas);
@@ -89,7 +89,7 @@
         nuevaFila.append(nuevoContenedor);
 
         nuevoContenedor = $('<div/>');
-        nuevoContenedor.addClass('medium-2 cell');
+        nuevoContenedor.addClass('medium-1 cell');
         var tipoDebitoCredito = tiposDebitoCredito.clone();
         tipoDebitoCredito.attr('id','tipoDebitoCredito' + filas);
         tipoDebitoCredito.attr('name','tipoDebitoCredito' + filas);
@@ -101,9 +101,8 @@
 
         nuevoContenedor = $('<div/>');
         nuevoContenedor.addClass('medium-2 cell');
-        nuevoElemento = $('<input/>');
+        nuevoElemento = $('<select/>');
         nuevoElemento.attr('id','debitoCredito' + filas);
-        nuevoElemento.attr('type','text');
         nuevoElemento.attr('name','debitoCredito' + filas);
         nuevoElemento.attr('placeholder','{{{__ "Producto"}}}');
         nuevoContenedor.append(nuevoElemento);
@@ -122,7 +121,7 @@
         nuevaFila.append(nuevoContenedor);
 
         nuevoContenedor = $('<div/>');
-        nuevoContenedor.addClass('medium-2 cell');
+        nuevoContenedor.addClass('medium-1 cell');
         nuevoElemento = $('<input/>');
         nuevoElemento.attr('id','descripcion' + filas);
         nuevoElemento.attr('type','text');
@@ -139,6 +138,7 @@
         nuevoElemento.attr('type','text');
         nuevoElemento.attr('name','cantidad' + filas);
         nuevoElemento.attr('length',2);
+        nuevoElemento.val(1);
         nuevoElemento.attr('placeholder','{{{__ "Cantidad"}}}');
         nuevoContenedor.append(nuevoElemento);
 
@@ -151,6 +151,7 @@
         nuevoElemento.attr('type','text');
         nuevoElemento.attr('name','valor' + filas);
         nuevoElemento.attr('length',9);
+        nuevoElemento.addClass('valor');
         nuevoElemento.attr('placeholder','{{{__ "Valor"}}}');
         nuevoContenedor.append(nuevoElemento);
 
@@ -173,8 +174,39 @@
 
         nuevaFila.append(nuevoContenedor);
 
-
         $('#datos').append(nuevaFila);
+
+        $('#tipoDebitoCredito'+filas).change(function(){
+            cargarDebitoCredito(this.value,filas);
+        });
+
+        cargarDebitoCredito($('#tipoDebitoCredito'+filas).val(),filas);
+
+        $('#valor' + filas).keyup(function(){
+            let subtotal = 0;
+            $( ".valor" ).each(function( index ) {
+                if(Number(this.value))
+                    subtotal += Number(this.value);
+            });
+            $('#subtotal').attr('value',subtotal);
+        });
+    }
+
+
+    function cargarDebitoCredito(value,fila){
+        console.log(value + " "+ fila);
+        $.get('movimiento/debitoCredito/'+ value, (data) => {
+
+            $('#debitoCredito'+fila).contents().remove();
+            
+            for(let i=0;i<data.length;i++){
+                let nuevoDebitoCredito =  $('<option/>');
+                nuevoDebitoCredito.html(data[i].dc_nombre);
+                nuevoDebitoCredito.attr('value', data[i].dc_consecutivo);
+                $('#debitoCredito'+fila).append(nuevoDebitoCredito);
+            }
+
+        });
     }
 </script>
 </body>
