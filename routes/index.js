@@ -502,6 +502,21 @@ router.get('/movimiento/debitoCredito/:tipo', function(req, res){
     });
 });
 
+router.post("/movimiento",authenticationMiddleware(), (req,res) => {
+
+for (var param in req.body) {
+    if(param.includes("valor")){
+        let 
+    }
+    console.log("hey"+ param+"->"+req.body[param]);
+}
+
+
+    let usuario = req.session.passport.user;
+    res.redirect('/movimiento');
+    
+});
+
 //Generalidades
 
 router.get("/cambioIdioma",(req, res) => {

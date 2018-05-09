@@ -15,7 +15,7 @@
                     <p>{{{__ "Subtotal"}}}</p>
                 </div>
                 <div class="medium-1 cell">
-                    <input id="subtotal" type="text" name="subtotal" disabled>
+                    <input id="subtotal" type="text" name="subtotal">
                 </div>
                 <div class="medium-1 cell">
                     <a href="#" id="agregar" class="button" onclick="agregarFila();">{{{__ "+"}}}</a>
@@ -177,7 +177,8 @@
         $('#datos').append(nuevaFila);
 
         $('#tipoDebitoCredito'+filas).change(function(){
-            cargarDebitoCredito(this.value,filas);
+            let fila = $(this).attr('id').replace("tipoDebitoCredito","");
+            cargarDebitoCredito(this.value,fila);
         });
 
         cargarDebitoCredito($('#tipoDebitoCredito'+filas).val(),filas);
@@ -194,11 +195,8 @@
 
 
     function cargarDebitoCredito(value,fila){
-        console.log(value + " "+ fila);
         $.get('movimiento/debitoCredito/'+ value, (data) => {
-
             $('#debitoCredito'+fila).contents().remove();
-            
             for(let i=0;i<data.length;i++){
                 let nuevoDebitoCredito =  $('<option/>');
                 nuevoDebitoCredito.html(data[i].dc_nombre);
