@@ -29,9 +29,9 @@ router.post("/LoginToggle", (req, res) => {
 
 router.get("/", authenticationMiddleware(), (req,res) => {
     if(req.cookies.i18n == undefined)
-        res.setLocale('en')
+        res.setLocale('en');
     else
-        res.setLocale(req.cookies.i18n)
+        res.setLocale(req.cookies.i18n);
     
     console.log(req.isAuthenticated());
 
@@ -464,7 +464,58 @@ function obtenerFuentes(usuario, cb){
 
 router.get("/movimiento", authenticationMiddleware(), (req,res) => {
     let usuario = req.session.passport.user;
-    errores = [];
+    obtenerParametrosMovimiento(usuario,res);
+    
+});
+
+router.get('/movimiento/debitoCredito/:tipo', function(req, res){ 
+    let tipo = req.params.tipo;
+
+    buscarDebitosCreditoPorTipo(tipo,(err,debitosCreditos) => {
+        if (err) throw err;
+        res.json(debitosCreditos);
+    });
+});
+
+router.post("/movimiento",authenticationMiddleware(), (req,res) => {
+    let usuario = req.session.passport.user;
+    let errores = [];
+    for (var param in req.body) {
+        if(param.includes("valor")){
+            let movimiento = param.replace("valor","");
+
+            let fecha = req.body["fecha"+movimiento];
+            let fuente = req.body["fuente"+movimiento];
+            let tipoDebitoCredito = req.body["tipoDebitoCredito"+movimiento];
+            let debitoCredito = req.body["debitoCredito"+movimiento];
+            let nombre = req.body["nombre"+movimiento];
+            let descripcion = req.body["descripcion"+movimiento];
+            let cantidad = req.body["cantidad"+movimiento];
+            let valor = req.body["valor"+movimiento];
+
+            req.checkBody("fecha"+movimiento,res.__('La fecha no puede ser nula')).notEmpty();
+            req.checkBody("fuente"+movimiento,res.__('La fuente no puede ser nula')).notEmpty();
+            req.checkBody("debitoCredito"+movimiento,res.__('El débito crédito no puede ser nulo')).notEmpty();
+            req.checkBody("cantidad"+movimiento,res.__('La cantidad debe ser y mayor a 0')).isInt({gt:0});
+            req.checkBody("valor"+movimiento,res.__('El valor debe ser numérico y mayor a 0')).isNumeric({gt:0});
+            
+            errores = req.validationErrors();
+
+            if(!errores)
+            {
+                let params = [fuente,debitoCredito,nombre,descripcion,valor,cantidad,fecha,usuario];
+                db.query("INSERT INTO movimiento(f_fuente,dc_debito_credito,m_nombre,m_descripcion,m_valor,m_cantidad,m_fecha,u_usuario) VALUES (?,?,?,?,?,?,?,?);",params);
+            }
+                  
+        }
+        
+    }
+    
+    obtenerParametrosMovimiento(usuario,res,errores);
+    
+});
+
+function obtenerParametrosMovimiento(usuario,res,errores){
     obtenerFuentes(usuario,(err,fuentes) => {
         if(err) throw err;
             if (fuentes.length === 0) {
@@ -477,7 +528,6 @@ router.get("/movimiento", authenticationMiddleware(), (req,res) => {
             } else {
                 obtenerTiposDebitoCreditoOrdenPopular(usuario,(err,tiposDebitoCredito) => {
                     if(err) throw err;
-        
                     if (tiposDebitoCredito.length === 0) {
                         let errorNuevo = {msg: res.__('No se encontraron Tipos Débito Crédito')};
                         if(errores)
@@ -491,31 +541,7 @@ router.get("/movimiento", authenticationMiddleware(), (req,res) => {
                 });
             }
     });
-});
-
-router.get('/movimiento/debitoCredito/:tipo', function(req, res){ 
-    let tipo = req.params.tipo;
-
-    buscarDebitosCreditoPorTipo(tipo,(err,debitosCreditos) => {
-        if (err) throw err;
-        res.json(debitosCreditos);
-    });
-});
-
-router.post("/movimiento",authenticationMiddleware(), (req,res) => {
-
-for (var param in req.body) {
-    if(param.includes("valor")){
-        let 
-    }
-    console.log("hey"+ param+"->"+req.body[param]);
 }
-
-
-    let usuario = req.session.passport.user;
-    res.redirect('/movimiento');
-    
-});
 
 //Generalidades
 

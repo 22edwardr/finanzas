@@ -87,5 +87,11 @@
 	"Producto": "Producto",
 	"Cantidad": "Cantidad",
 	"Valor": "Valor",
-	"-": "-"
+	"-": "-",
+	"La fecha no puede ser nula": "La fecha no puede ser nula",
+	"La fuente no puede ser nula": "La fuente no puede ser nula",
+	"El débito crédito no puede ser nulo": "El débito crédito no puede ser nulo",
+	"El valor debe ser numérico": "El valor debe ser numérico",
+	"La cantidad debe ser y mayor a 0": "La cantidad debe ser y mayor a 0",
+	"El valor debe ser numérico y mayor a 0": "El valor debe ser numérico y mayor a 0"
 }
