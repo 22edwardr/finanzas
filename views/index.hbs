@@ -127,17 +127,9 @@
 {{> footer }}
 
 <script>
-
-  
-    
     $(function(){
-         
-    });
-
-
-
-    $('#tipoDebitoCreditoFiltro').change(function(){
-        $.get('movimiento/debitoCredito/'+ this.value, (data) => {
+        $('#tipoDebitoCreditoFiltro').change(function(){
+            $.get('movimiento/debitoCredito/'+ this.value, (data) => {
                 $('#debitoCreditoFiltro').contents().remove();
                 let nuevoDebitoCredito =  $('<option/>');
                 nuevoDebitoCredito.html("{{{__ "Escoge Débito Crédito"}}}");
@@ -149,10 +141,9 @@
                     nuevoDebitoCredito.attr('value', data[i].dc_consecutivo);
                     $('#debitoCreditoFiltro').append(nuevoDebitoCredito);
                 }
-
             });
+         });
     });
-
 </script>
 </body>
 </html>
