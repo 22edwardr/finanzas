@@ -1,8 +1,158 @@
 {{> header }}
 
+<form action="/" method="POST">
+<div class="grid-container" style="min-width: 100%;padding:1% 5% 1% 5%;">
+    <div class="grid-x grid-margin-x">
+        <div class="medium-12 cell">
+            <h2 class="align-center">{{{__ "Tablero"}}}</h2>
+        </div>
+        <div id="filtros" class="medium-12 cell">
+            <div class="grid-x grid-margin-x" id="filtrosContainer">
+                <div class="medium-4 cell" id="fechaContainer">
+                    <div class="grid-x grid-margin-x" id="grillaFecha">
+                        <div class="medium-12 cell" id="fechaElemento">
+                            <input type="date" name="fecha" id="fecha"/>
+                        </div>
+                        <div class="medium-12 cell" id="fechaPrecision">
+                            <fieldset class="fieldset">
+                                <legend>{{{__ "Precisión"}}}</legend>
+                                <input type="radio" name="tipoFecha" value="ALL" id="fechaA"><label for="fechaA">{{{__ "Ninguno"}}}</label>
+                                <input type="radio" name="tipoFecha" value="Y" id="fechaY" ><label for="fechaY">{{{__ "Año"}}}</label>
+                                <input type="radio" name="tipoFecha" value="M" id="fechaM" checked><label for="fechaM">{{{__ "Mes"}}}</label>
+                                <input type="radio" name="tipoFecha" value="W" id="fechaW"><label for="fechaW">{{{__ "Semana"}}}</label>
+                                <input type="radio" name="tipoFecha" value="D" id="fechaD"><label for="fechaD">{{{__ "Dia"}}}</label>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="medium-2 cell" id="fuenteContainer">
+                    <select name="fuenteFiltro" id="fuenteFiltro">
+                        <option value="ALL">{{{__ "Escoge fuente"}}}</option>
+{{#each fuentes}}
+                        <option value="{{this.f_consecutivo}}">{{this.f_nombre}}</option>
+{{/each}}
+                    </select>
+                </div>
+                <div class="medium-2 cell" id="tipoContainer">
+                    <select name="tipoDebitoCreditoFiltro" id="tipoDebitoCreditoFiltro" >
+                        <option value="ALL">{{{__ "Escoge Tipo Débito Crédito"}}}</option>
+{{#each tiposDebitoCredito}}
+                        <option value="{{this.tdc_consecutivo}}">{{this.tdc_codigo}}</option>
+{{/each}}
+                    </select>
+                </div>
+                <div class="medium-2 cell" id="productoContainer">
+                    <select name="debitoCreditoFiltro" id="debitoCreditoFiltro">
+                        <option value="ALL">{{{__ "Escoge Débito Crédito"}}}</option>
+                    </select>
+                </div>
+                <div class="medium-2 cell" id="buscarContainer">
+                    <input type="submit" name="submit" id="submit" class="button" value="{{{__ "Busqueda"}}}">
+                </div>
+            </div>
+        </div>
+        <div class="medium-12 cell" id="datos">
+            <div class="grid-x grid-margin-x" id="canvasContainer">
+                <div class="medium-6 cell" id="canvasEgresos">
+                    <canvas id="chartAreaEgresos"></canvas>
+                </div>
+                <div class="medium-6 cell" id="canvasIngresos">
+                    <canvas id="chartAreaIngresos"></canvas>
+                </div>
+            </div>
+            <div class="grid-x grid-margin-x" id="balanceContainer">
+                <div class="medium-12 cell" id="balance">
+                    <h3 align="center">
+                        {{{__ "Balance"}}}
+                    </h3>
+                    <h2 id="balance" align="center">
+                        {{balance}}
+                    </h2>
+                </div>
+            </div>
+            <div class="medium-6 medium-offset-3 cell" id="canvasDetalle">
+                <canvas id="chartAreaDetalle"></canvas>
+            </div>
+            <div class="medium-12 cell" id="datosFuentes">
+{{#if fuentesDetalle}}
+            <table class="margin-left-10 width-80" >
+                <tr>
+                    <th>{{{__ "Nombre"}}}</th>
+                    <th>{{{__ "Egresos"}}}</th>
+                    <th>{{{__ "Ingresos"}}}</th>
+                    <th>{{{__ "Balance"}}}</th>
+                </tr>
+    {{#each fuentesDetalle}}
+                <tr>
+                    <td>{{this.nombre}}</td>
+                    <td>{{this.egreso}}</td>
+                    <td>{{this.ingreso}}</td>
+                    <td>{{this.balance}}</td>
+                </tr>
+    {{/each}}
+            </table>
+{{/if}}
+            </div>
+            <div class="medium-12 cell" id="datosMovimientos">
+{{#if movimientos}}
+            <table class="margin-left-10 width-80" >
+                <tr>
+                    <th>{{{__ "Fecha"}}}</th>
+                    <th>{{{__ "Tipo Débito Credito"}}}</th>
+                    <th>{{{__ "Débito Credito"}}}</th>
+                    <th>{{{__ "Fuente"}}}</th>
+                    <th>{{{__ "Nombre"}}}</th>
+                    <th>{{{__ "Cantidad"}}}</th>
+                    <th>{{{__ "Valor"}}}</th>
+                </tr>
+    {{#each movimientos}}
+                <tr>
+                    <td>{{this.fecha}}</td>
+                    <td>{{this.codigoTipo}}</td>
+                    <td>{{this.nombreDebCre}}</td>
+                    <td>{{this.nombreFuente}}</td>
+                    <td>{{this.nombreMov}}</td>
+                    <td>{{this.cantidad}}</td>
+                    <td>{{this.valor}}</td>
+                </tr>
+    {{/each}}
+            </table>
+{{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+</form>
 
-
-
-    
 {{> footer }}
 
+<script>
+
+  
+    
+    $(function(){
+         
+    });
+
+
+
+    $('#tipoDebitoCreditoFiltro').change(function(){
+        $.get('movimiento/debitoCredito/'+ this.value, (data) => {
+                $('#debitoCreditoFiltro').contents().remove();
+                let nuevoDebitoCredito =  $('<option/>');
+                nuevoDebitoCredito.html("{{{__ "Escoge Débito Crédito"}}}");
+                nuevoDebitoCredito.attr('value', "ALL");
+                $('#debitoCreditoFiltro').append(nuevoDebitoCredito);
+                for(let i=0;i<data.length;i++){
+                    nuevoDebitoCredito =  $('<option/>');
+                    nuevoDebitoCredito.html(data[i].dc_nombre);
+                    nuevoDebitoCredito.attr('value', data[i].dc_consecutivo);
+                    $('#debitoCreditoFiltro').append(nuevoDebitoCredito);
+                }
+
+            });
+    });
+
+</script>
+</body>
+</html>

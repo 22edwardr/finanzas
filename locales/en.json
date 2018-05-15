@@ -87,5 +87,16 @@
 	"Cantidad": "Quantity",
 	"Valor": "Value",
 	"-": "-",
-	"El tipo no puede ser nulo": "El tipo no puede ser nulo"
+	"El tipo no puede ser nulo": "El tipo no puede ser nulo",
+	"Precisión": "Precisión",
+	"Ninguno": "Ninguno",
+	"Año": "Año",
+	"Mes": "Mes",
+	"Semana": "Semana",
+	"Dia": "Dia",
+	"Tablero": "Tablero",
+	"Busqueda": "Busqueda",
+	"Escoge fuente": "Escoge fuente",
+	"Escoge Tipo Débito Crédito": "Escoge Tipo Débito Crédito",
+	"Escoge Débito Crédito": "Escoge Débito Crédito"
 }

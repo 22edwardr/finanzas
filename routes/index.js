@@ -35,7 +35,142 @@ router.get("/", authenticationMiddleware(), (req,res) => {
     
     console.log(req.isAuthenticated());
 
-    res.render("index",{ active: "index"});   
+    let usuario = req.session.passport.user;
+    let errores = [];
+    //Tablero
+    obtenerParametrosMovimiento({pagina: "index",usuario,res});
+});
+
+
+router.post("/",authenticationMiddleware(),(req,res) => {
+    const { fecha , tipoFecha ,  fuenteFiltro ,  tipoDebitoCreditoFiltro , debitoCreditoFiltro ,  submit } = req.body;
+    let usuario = req.session.passport.user;
+    let errores = null;
+    if(tipoFecha != "ALL"){
+        req.checkBody("fecha",res.__('La fecha no puede ser nula')).notEmpty();
+        errores = req.validationErrors();
+    }else if(fuenteFiltro == "ALL" && tipoDebitoCreditoFiltro == "ALL" && debitoCreditoFiltro=="ALL"){
+        let errorNuevo = {msg: res.__('Debe escoger al menos un filtro')};
+        let errores = [];
+        errores.push(errorNuevo);
+    }
+    if(errores){
+        obtenerParametrosMovimiento({pagina: "index",usuario,res,errores});
+    }else{
+        let filtroFecha = "";
+        let filtroFuente = "";
+        let filtroTipo = "";
+        let filtroDebCre = "";
+        let consulta = "SELECT tdc.tdc_consecutivo consTipo,tdc.tdc_codigo codigoTipo,tdc.tdc_color colorTipo,tdc.tdc_naturaleza naturalezaTipo,dc.dc_consecutivo consDebCre, dc.dc_nombre nombreDebCre,dc.dc_color colorDebCre,f.f_consecutivo consFuente,f.f_nombre nombreFuente,m.m_nombre nombreMov,m.m_valor valor,m.m_cantidad cantidad,DATE_FORMAT(m.m_fecha, '%Y-%m-%d') fecha FROM movimiento m JOIN fuente f ON f.f_consecutivo=m.f_fuente JOIN debito_credito dc ON dc.dc_consecutivo = m.dc_debito_credito JOIN tipo_debito_credito tdc ON tdc.tdc_consecutivo = dc.tdc_tipo_debito_credito WHERE m.u_usuario = ?";
+        let parameters = [usuario];
+        if(tipoFecha != "ALL"){
+            if(tipoFecha == "Y"){
+                let fechaTemp = new Date(fecha);
+                var fechaInicioBusqueda = fechaTemp.getFullYear() + "-01-01";
+                var fechaFinBusqueda = fechaTemp.getFullYear() + "-12-31";
+            }else if(tipoFecha == "M"){
+                let fechaTemp = new Date(fecha);
+                fechaTemp.setDate(1);
+                var fechaInicioBusqueda =  fechaTemp.getFullYear()+ "-" + ("00"+(fechaTemp.getMonth() + 1)).slice(-2)  + "-" + ("00"+fechaTemp.getDate()).slice(-2);
+                fechaTemp.setMonth(fechaTemp.getMonth() + 1 );
+                fechaTemp.setDate(fechaTemp.getDate() - 1); 
+                var fechaFinBusqueda =  fechaTemp.getFullYear()+ "-" + ("00"+(fechaTemp.getMonth() + 1)).slice(-2)  + "-" + ("00"+fechaTemp.getDate()).slice(-2);
+            }else if(tipoFecha == "W"){
+                let fechaTemp = new Date(fecha);
+                fechaTemp.setDate(fechaTemp.getDate()-fechaTemp.getDay());
+                var fechaInicioBusqueda =  fechaTemp.getFullYear()+ "-" + ("00"+(fechaTemp.getMonth() + 1)).slice(-2)  + "-" + ("00"+fechaTemp.getDate()).slice(-2);
+                fechaTemp.setDate(fechaTemp.getDate() + 6 );
+                var fechaFinBusqueda =  fechaTemp.getFullYear()+ "-" + ("00"+(fechaTemp.getMonth() + 1)).slice(-2)  + "-" + ("00"+fechaTemp.getDate()).slice(-2);
+            }else{
+                var fechaInicioBusqueda = fecha;
+                var fechaFinBusqueda = fecha;
+            }
+             filtroFecha = " AND m_fecha BETWEEN ? AND ? ";
+             parameters.push(fechaInicioBusqueda);
+             parameters.push(fechaFinBusqueda);
+        }
+        if(fuenteFiltro != "ALL"){
+            filtroFuente = " AND f_fuente = ? "
+            parameters.push(fuenteFiltro);
+        }
+        if(tipoDebitoCreditoFiltro != "ALL"){
+            filtroTipo = " AND tdc_tipo_debito_credito = ? "
+            parameters.push(tipoDebitoCreditoFiltro);
+        }
+        if(debitoCreditoFiltro != "ALL"){
+            filtroDebCre = " AND dc_debito_credito = ? "
+            parameters.push(debitoCreditoFiltro);
+        }
+
+        consulta = consulta + filtroFecha + filtroFuente + filtroTipo + filtroDebCre ;
+        console.log(consulta);
+        db.query(consulta,parameters,(err,movimientos)=>{
+            let ingresosTipo = [];
+            let egresosTipo = [];
+            let fuentesDetalle = [];
+            let balance = 0.0;
+
+            if (err) throw err;
+
+            for (let i=0; i<movimientos.length;i++) {        
+                let existeTipo = false;
+                let existeFuente = false;
+                if(movimientos[i].naturalezaTipo == 0){
+                    balance -= movimientos[i].valor;
+                    for(let j=0; j<egresosTipo.length; j++){
+                        if(egresosTipo[j].codigo == movimientos[i].consTipo){
+                            existeTipo = true;
+                            egresosTipo[j].valor += movimientos[i].valor;
+                        }
+                    }
+                    if(!existeTipo){
+                        egresosTipo.push({consecutivo: movimientos[i].consTipo , nombre: movimientos[i].codigoTipo,  valor :   movimientos[i].valor});
+                    }
+
+
+                    for(let j=0; j<fuentesDetalle.length; j++){
+                        if(fuentesDetalle[j].codigo == movimientos[i].consFuente){
+                            existeFuente = true;
+                            fuentesDetalle[j].egreso += movimientos[i].valor;
+                            fuentesDetalle[j].balance -= movimientos[i].valor;
+                        }
+                    }
+                    if(!existeFuente){
+                        fuentesDetalle.push({codigo: movimientos[i].consFuente , nombre: movimientos[i].nombreFuente, egreso :  movimientos[i].valor, ingreso: 0.0, balance: -movimientos[i].valor });
+                    }
+
+
+                }else{
+                    balance += movimientos[i].valor;
+                    for(var j=0; j<ingresosTipo.length; j++){
+                        if(ingresosTipo[j].codigo == movimientos[i].consTipo){
+                            existeTipo = true;
+                            ingresosTipo[j].valor += movimientos[i].valor;
+                        }
+                    }
+                    if(!existeTipo){
+                        ingresosTipo.push({consecutivo: movimientos[i].consTipo , nombre: movimientos[i].codigoTipo,  valor :  movimientos[i].valor});
+                    }
+
+                    for(let j=0; j<fuentesDetalle.length; j++){
+                        if(fuentesDetalle[j].codigo == movimientos[i].consFuente){
+                            existeFuente = true;
+                            fuentesDetalle[j].ingreso += movimientos[i].valor;
+                            fuentesDetalle[j].balance += movimientos[i].valor;
+                        }
+                    }
+                    if(!existeFuente){
+                        fuentesDetalle.push({codigo: movimientos[i].consFuente , nombre: movimientos[i].nombreFuente, egreso :  0.0, ingreso: movimientos[i].valor, balance: movimientos[i].valor });
+                    }
+                }
+
+                
+            }
+            obtenerParametrosMovimiento({pagina : "index",movimientos,fuentesDetalle,egresosTipo,ingresosTipo, balance,usuario,res,errores});
+        });
+    }
+    
+
 });
 
 router.post("/Ingreso", passport.authenticate('local', {
@@ -464,7 +599,7 @@ function obtenerFuentes(usuario, cb){
 
 router.get("/movimiento", authenticationMiddleware(), (req,res) => {
     let usuario = req.session.passport.user;
-    obtenerParametrosMovimiento(usuario,res);
+    obtenerParametrosMovimiento({ pagina: "movimiento",usuario,res});
     
 });
 
@@ -511,11 +646,21 @@ router.post("/movimiento",authenticationMiddleware(), (req,res) => {
         
     }
     
-    obtenerParametrosMovimiento(usuario,res,errores);
+    obtenerParametrosMovimiento({pagina: "movimiento",usuario,res,errores});
     
 });
 
-function obtenerParametrosMovimiento(usuario,res,errores){
+function obtenerParametrosMovimiento(params){
+    let usuario = params.usuario;
+    let res = params.res;
+    let pagina = params.pagina;
+    let errores = params.errores;
+    let ingresosTipo = params.ingresosTipo;
+    let egresosTipo = params.egresosTipo;
+    let fuentesDetalle = params.fuentesDetalle;
+    let movimientos =  params.movimientos;
+    let balance = params.balance;
+
     obtenerFuentes(usuario,(err,fuentes) => {
         if(err) throw err;
             if (fuentes.length === 0) {
@@ -524,7 +669,7 @@ function obtenerParametrosMovimiento(usuario,res,errores){
                     errores.push(errorNuevo);
                 else
                     errores = [errorNuevo];
-                res.render("movimiento", { active: "movimiento" , errores});
+                res.render(pagina, { active: pagina , ingresosTipo,  egresosTipo, fuentesDetalle, movimientos, balance,  errores});
             } else {
                 obtenerTiposDebitoCreditoOrdenPopular(usuario,(err,tiposDebitoCredito) => {
                     if(err) throw err;
@@ -534,9 +679,9 @@ function obtenerParametrosMovimiento(usuario,res,errores){
                             errores.push(errorNuevo);
                         else
                             errores = [errorNuevo];
-                        res.render("movimiento", { active: "movimiento", fuentes, errores});
+                        res.render(pagina, { active: pagina, ingresosTipo,  egresosTipo, fuentesDetalle, movimientos, balance ,fuentes, errores});
                     } else {
-                        res.render("movimiento", { active: "movimiento", tiposDebitoCredito, fuentes , errores});
+                        res.render(pagina, { active: pagina, ingresosTipo,  egresosTipo, fuentesDetalle, movimientos, balance ,tiposDebitoCredito, fuentes , errores});
                     }
                 });
             }

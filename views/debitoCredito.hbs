@@ -54,9 +54,9 @@
             <input id="Busqueda" class="margin-left-40 width-20" type="text" placeholder="Busqueda">
             <table class="margin-left-10 width-80" >
                 <tr>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
-                    <th>Balance</th>
+                    <th>{{{__ "Nombre"}}}</th>
+                    <th>{{{__ "Tipo"}}}</th>
+                    <th>{{{__ "Balance"}}}</th>
                 </tr>
     {{#each results}}
                 <tr id="fila{{this.dc_consecutivo}}" data-toggle="detalle" onclick="irADetalle({{this.dc_consecutivo}});">

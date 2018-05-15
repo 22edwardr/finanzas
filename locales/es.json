@@ -93,5 +93,21 @@
 	"El débito crédito no puede ser nulo": "El débito crédito no puede ser nulo",
 	"El valor debe ser numérico": "El valor debe ser numérico",
 	"La cantidad debe ser y mayor a 0": "La cantidad debe ser y mayor a 0",
-	"El valor debe ser numérico y mayor a 0": "El valor debe ser numérico y mayor a 0"
+	"El valor debe ser numérico y mayor a 0": "El valor debe ser numérico y mayor a 0",
+	"Tablero": "Tablero",
+	"Precisión": "Precisión",
+	"Ninguno": "Ninguno",
+	"Año": "Año",
+	"Mes": "Mes",
+	"Semana": "Semana",
+	"Dia": "Dia",
+	"Escoge fuente": "Escoge fuente",
+	"Escoge Tipo Débito Crédito": "Escoge Tipo Débito Crédito",
+	"Escoge Débito Crédito": "Escoge Débito Crédito",
+	"Busqueda": "Busqueda",
+	"Debe escoger al menos un filtro": "Debe escoger al menos un filtro",
+	"Egresos": "Egresos",
+	"Ingresos": "Ingresos",
+	"Débito Credito": "Débito Credito",
+	"Fuente": "Fuente"
 }
